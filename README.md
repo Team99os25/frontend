@@ -2,6 +2,8 @@
 
 An AI-powered conversational bot designed to track employee well-being and engagement using Deloitte's Vibemeter data.  
 
+![Vibemeter AI Bot](public/images/home.png)
+
 
 ## 🛠️ Setup & Installation  
 
