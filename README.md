@@ -1,6 +1,6 @@
 # Vibemeter AI Bot  
 
-An AI-powered conversational bot designed to track employee well-being and engagement using Deloitte's Vibemeter data.  
+An AI-powered conversational bot designed to track employee well-being and engagement.
 
 ![Vibemeter AI Bot](public/images/home.png)
 
@@ -10,7 +10,7 @@ An AI-powered conversational bot designed to track employee well-being and engag
 ### 1(a). Clone the Repository
 ```sh
 git clone https://github.com/Team99os25/frontend.git
-cd vibemeter-ai
+cd frontend
 ```
 
 ### 1(b). First-Time Git Setup
