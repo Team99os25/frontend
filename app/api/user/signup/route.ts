@@ -17,35 +17,51 @@ export async function POST(req: NextRequest) {
   try {
     const supabase = await createClient()
     const body = await req.json();
-    const { e_name, email, e_password, e_role } = body;
+    const { e_name, email, e_password, e_role, e_id } = body;
 
-    if (!e_name || !email || !e_password || !e_role) {
-      return NextResponse.json({code: 1, message: "Name, email, password and employee's role are required" },{ status: 400 });
+    if (!e_name || !email || !e_password || !e_role || !e_id) {
+      return NextResponse.json({ code: 1, message: "Name, email, password, employee id and employee's role are required" }, { status: 400 });
     }
 
     const checkEmail = validateEmail(email)
-    if(!checkEmail){
+    if (!checkEmail) {
       return NextResponse.json(
-        {message: "Enter a valid Email"},
-        {status:400}
+        { message: "Enter a valid Email" },
+        { status: 400 }
       );
     }
 
-    const { data, error: emailError  } = await supabase
-    .from('employee')
-    .select('email')
-    .eq('email', email)
-    .single();
-  
-    if (emailError?.details != "The result contains 0 rows" || data?.email == email) {
-      return NextResponse.json({code: 1, message: 'Email is already registered', emailError }, { status: 400 });
+    const { data: emailData, error: emailError } = await supabase
+      .from('employee')
+      .select('email')
+      .eq('email', email)
+      .single();
+
+    if (emailData?.email === email) {
+      return NextResponse.json(
+        { code: 1, message: 'Email is already registered', emailError },
+        { status: 400 }
+      );
+    }
+
+    const { data: e_IdData, error: e_IdError } = await supabase
+      .from('employee')
+      .select('e_id')
+      .eq('e_id', e_id)
+      .single();
+
+    if (e_IdData?.e_id === e_id) {
+      return NextResponse.json(
+        { code: 1, message: 'Employee Id is already registered', e_IdError },
+        { status: 400 }
+      );
     }
 
     const hashedPassword = await genHasPass(e_password)
 
     const { error } = await supabase
       .from('employee')
-      .insert({ e_name: e_name, email: email, e_password: hashedPassword, e_role: e_role })
+      .insert({ e_name: e_name, email: email, e_password: hashedPassword, e_role: e_role, e_id: e_id })
 
     if (!process.env.JWT_SECRET) {
       throw new Error("JWT_SECRET is missing in environment variables");
@@ -57,7 +73,7 @@ export async function POST(req: NextRequest) {
       { expiresIn: "10h" }
     );
 
-    return NextResponse.json({code: 0, message: "Signed up successfully" }, { status: 201 });
+    return NextResponse.json({ code: 0, message: "Signed up successfully" }, { status: 201 });
   } catch (error: any) {
     console.error("Signup error:", error);
     return NextResponse.json(

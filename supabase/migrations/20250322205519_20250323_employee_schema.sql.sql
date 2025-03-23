@@ -1,10 +1,11 @@
 -- Create a table for employee data
 create table employee (
-  id uuid not null default gen_random_uuid() primary key,
+  id uuid not null default gen_random_uuid() ,
   e_name text not null,
   e_role text not null,
   email text not null unique,
-  e_password text not null
+  e_password text not null,
+  e_id text not null primary key
 );
 
 -- Set up Row Level Security (RLS)

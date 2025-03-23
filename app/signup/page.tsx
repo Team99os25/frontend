@@ -18,6 +18,7 @@ const validationSchema = Yup.object({
   email: Yup.string().email("Invalid email").required("Required"),
   e_password: Yup.string().min(8, "At least 8 characters").required("Required"),
   e_role: Yup.string().oneOf(["HR", "Employee"], "Select a valid role").required("Required"),
+  e_id: Yup.string().required("Required"),
 }).required();
 type FormData = Yup.InferType<typeof validationSchema>;
 
@@ -29,6 +30,7 @@ const SignupPage = () => {
       email: "",
       e_role: "HR",
       e_password: "",
+      e_id: ""
     }
   });
 
@@ -82,6 +84,25 @@ const SignupPage = () => {
             />
             {errors.e_name && (
               <p className="mt-1 text-sm text-red-500">{errors.e_name.message}</p>
+            )}
+          </div>
+
+          <div className="mb-4">
+            <label htmlFor="e_id" className="block text-sm font-medium text-gray-700">
+              Your Employee Id
+            </label>
+            <input
+              {...register("e_id", { required: "Your name is required" })}
+              aria-invalid={errors.e_id ? "true" : "false"}
+              type="text"
+              id="e_id"
+              name="e_id"
+              placeholder="Enter your Employee Id"
+              className="mt-1 w-full rounded-lg border border-gray-300 p-3 text-gray-900 shadow-sm outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+            {errors.e_id && (
+              <p className="mt-1 text-sm text-red-500">{errors.e_id.message}</p>
             )}
           </div>
 
