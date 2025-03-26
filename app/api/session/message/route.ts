@@ -1,42 +1,46 @@
-import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase";
+import createDB from "@/db";
+import { users, wellbeing_messages, wellbeing_sessions } from "@/db/schema";
 import { LLMCallService } from "@/lib/llm-service";
-import {
-    ChatMessage,
-    SessionMessageRequest,
-    SessionMessageResponse,
-} from "@/lib/types";
+import { ChatMessage } from "@/types/llm";
+import { and, asc, eq } from "drizzle-orm";
+import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+
+const SessionMessageRequestSchema = z.object({
+    sessionId: z.string().uuid(),
+    employeeId: z.string().min(1),
+    message: z.string().min(1),
+});
 
 export async function POST(req: NextRequest) {
     try {
-        const {
-            sessionId,
-            employeeId,
-            message,
-            chatHistory,
-        }: SessionMessageRequest = await req.json();
+        // Parse and validate the request body
+        const result = SessionMessageRequestSchema.safeParse(await req.json());
 
-        if (!sessionId || !employeeId || !message || !chatHistory) {
+        if (!result.success) {
             return NextResponse.json(
                 {
-                    error: "Session ID, employee ID, message, and chat history are required",
+                    error: "Invalid request data",
+                    details: result.error.format(),
                 },
                 { status: 400 }
             );
         }
 
-        const supabase = await createClient();
+        const { sessionId, employeeId, message } = result.data;
+
         const llmService = new LLMCallService();
+        const db = await createDB();
 
         // Verify session belongs to employee
-        const { data: sessionData, error: sessionError } = await supabase
-            .from("wellbeing_session")
-            .select("id, is_completed")
-            .eq("id", sessionId)
-            .eq("employee_id", employeeId)
-            .single();
+        const sessionData = await db.query.wellbeing_sessions.findFirst({
+            where: and(
+                eq(wellbeing_sessions.id, sessionId),
+                eq(wellbeing_sessions.employee_id, employeeId)
+            ),
+        });
 
-        if (sessionError || !sessionData) {
+        if (!sessionData) {
             return NextResponse.json(
                 { error: "Session not found or access denied" },
                 { status: 404 }
@@ -50,87 +54,88 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        // Save user message
-        const { error: userMessageError } = await supabase
-            .from("wellbeing_message")
-            .insert({
-                session_id: sessionId,
-                role: "user",
-                content: message,
-            });
+        // Get chat history
+        const chatHistory = await db
+            .select({
+                role: wellbeing_messages.role,
+                content: wellbeing_messages.content,
+            })
+            .from(wellbeing_messages)
+            .where(eq(wellbeing_messages.session_id, sessionId))
+            .orderBy(asc(wellbeing_messages.timestamp));
 
-        if (userMessageError) {
-            return NextResponse.json(
-                { error: "Failed to save user message" },
-                { status: 500 }
-            );
-        }
+        // Save user message
+        await db.insert(wellbeing_messages).values({
+            session_id: sessionId,
+            role: "user",
+            content: message,
+        });
 
         // Update chat history with the new user message
-        const updatedChatHistory: ChatMessage[] = [
+        const updatedChatHistory = [
             ...chatHistory,
             { role: "user", content: message },
-        ];
+        ] as ChatMessage[];
 
         // Process message with LLM
-        const llmResponse = await llmService.processMessage(updatedChatHistory);
+        const llmResponse = await llmService.processMessage(
+            message,
+            updatedChatHistory
+        );
 
         // Save AI response
-        const { error: aiMessageError } = await supabase
-            .from("wellbeing_message")
-            .insert({
-                session_id: sessionId,
-                role: "assistant",
-                content: llmResponse.message,
-            });
-
-        if (aiMessageError) {
-            return NextResponse.json(
-                { error: "Failed to save AI response" },
-                { status: 500 }
-            );
-        }
+        await db.insert(wellbeing_messages).values({
+            session_id: sessionId,
+            role: "assistant",
+            content: llmResponse.message,
+        });
 
         // If this is the end of the session, mark it as completed and generate summary
         if (llmResponse.endSession) {
             // Get employee data for summary generation
-            const { data: employeeData } = await supabase
-                .from("employee")
-                .select("e_name, e_role")
-                .eq("e_id", employeeId)
-                .single();
+            const [employeeData] = await db
+                .select({
+                    name: users.name,
+                    role: users.role,
+                })
+                .from(users)
+                .where(eq(users.id, employeeId));
 
             // Add AI's final response to chat history
-            const finalChatHistory: ChatMessage[] = [
+            const finalChatHistory = [
                 ...updatedChatHistory,
                 { role: "assistant", content: llmResponse.message },
-            ];
+            ] as ChatMessage[];
 
             // Generate summary
             const summary = await llmService.generateSummary({
                 chatHistory: finalChatHistory,
-                employeeName: employeeData?.e_name || "Employee",
-                employeeRole: employeeData?.e_role || "Unknown",
+                employeeName: employeeData.name,
+                employeeRole: employeeData.role,
             });
 
             // Update session with summary and mark as completed
-            await supabase
-                .from("wellbeing_session")
-                .update({
+            await db
+                .update(wellbeing_sessions)
+                .set({
                     is_completed: true,
                     chat_summary: summary,
                 })
-                .eq("id", sessionId);
+                .where(eq(wellbeing_sessions.id, sessionId));
         }
 
-        const response: SessionMessageResponse = {
-            response: llmResponse.message,
-            endSession: llmResponse.endSession,
-        };
-
-        return NextResponse.json(response, { status: 200 });
+        return NextResponse.json(
+            {
+                response: llmResponse.message,
+                endSession: llmResponse.endSession,
+            },
+            { status: 200 }
+        );
     } catch (error: any) {
         console.error("Error processing message:", error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        return NextResponse.json(
+            { error: "Internal server error", message: error.message },
+            { status: 500 }
+        );
     }
 }

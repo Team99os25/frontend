@@ -1,84 +1,101 @@
-import { NextRequest, NextResponse } from "next/server";
-import { createClient } from '../../../../lib/supabase'
+import createDB from "@/db";
+import { userRoles, users } from "@/db/schema";
 import bcrypt from "bcryptjs";
+import { eq } from "drizzle-orm";
 import jwt from "jsonwebtoken";
-import validator from "validator";
+import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+
+const signupSchema = z.object({
+    name: z.string().min(1, "Name is required"),
+    email: z.string().email("Enter a valid Email"),
+    password: z.string().min(6, "Password must be at least 6 characters long"),
+    role: z.enum(userRoles.enumValues),
+    employeeId: z.string().min(1, "Employee ID is required"),
+});
 
 export async function POST(req: NextRequest) {
+    const genHashedPassword = async (password: string): Promise<string> => {
+        return await bcrypt.hash(password, 10);
+    };
 
-  const genHasPass = async (e_password: string): Promise<string> => {
-    return await bcrypt.hash(e_password, 10)
-  }
+    try {
+        const body = await req.json();
 
-  const validateEmail = (email: string): boolean => {
-    return validator.isEmail(email)
-  }
+        // Validate the request body using the Zod schema
+        const parsedBody = signupSchema.parse(body);
+        const { employeeId, name, email, password, role } = parsedBody;
 
-  try {
-    const supabase = await createClient()
-    const body = await req.json();
-    const { e_name, email, e_password, e_role, e_id } = body;
+        const db = await createDB();
 
-    if (!e_name || !email || !e_password || !e_role || !e_id) {
-      return NextResponse.json({ code: 1, message: "Name, email, password, employee id and employee's role are required" }, { status: 400 });
+        // Check if email already exists
+        const existingEmail = await db
+            .select({
+                id: users.id,
+            })
+            .from(users)
+            .where(eq(users.email, email))
+            .limit(1);
+
+        if (existingEmail.length > 0) {
+            return NextResponse.json(
+                { code: 1, message: "Email is already registered" },
+                { status: 400 }
+            );
+        }
+
+        // Check if employee ID already exists
+        const existingEmployeeId = await db
+            .select()
+            .from(users)
+            .where(eq(users.employeeId, employeeId))
+            .limit(1);
+
+        if (existingEmployeeId.length > 0) {
+            return NextResponse.json(
+                { code: 1, message: "Employee ID is already registered" },
+                { status: 400 }
+            );
+        }
+
+        const hashedPassword = await genHashedPassword(password);
+
+        // Insert new employee
+        await db.insert(users).values({
+            employeeId,
+            name,
+            email,
+            password: hashedPassword,
+            role,
+        });
+
+        if (!process.env.JWT_SECRET) {
+            throw new Error("JWT_SECRET is missing in environment variables");
+        }
+
+        const token = jwt.sign({ email }, process.env.JWT_SECRET as string, {
+            expiresIn: "10h",
+        });
+
+        return NextResponse.json(
+            { code: 0, message: "Signed up successfully", token },
+            { status: 201 }
+        );
+    } catch (error: any) {
+        if (error instanceof z.ZodError) {
+            return NextResponse.json(
+                {
+                    code: 1,
+                    message: error.errors.map((err) => err.message).join(", "),
+                },
+                { status: 400 }
+            );
+        }
+
+        console.error("Signup error:", error);
+        return NextResponse.json(
+            { code: 1, message: error.message || "Internal Server Error" },
+            { status: 500 }
+        );
     }
-
-    const checkEmail = validateEmail(email)
-    if (!checkEmail) {
-      return NextResponse.json(
-        { message: "Enter a valid Email" },
-        { status: 400 }
-      );
-    }
-
-    const { data: emailData, error: emailError } = await supabase
-      .from('employee')
-      .select('email')
-      .eq('email', email)
-      .single();
-
-    if (emailData?.email === email) {
-      return NextResponse.json(
-        { code: 1, message: 'Email is already registered', emailError },
-        { status: 400 }
-      );
-    }
-
-    const { data: e_IdData, error: e_IdError } = await supabase
-      .from('employee')
-      .select('e_id')
-      .eq('e_id', e_id)
-      .single();
-
-    if (e_IdData?.e_id === e_id) {
-      return NextResponse.json(
-        { code: 1, message: 'Employee Id is already registered', e_IdError },
-        { status: 400 }
-      );
-    }
-
-    const hashedPassword = await genHasPass(e_password)
-
-    const { error } = await supabase
-      .from('employee')
-      .insert({ e_name: e_name, email: email, e_password: hashedPassword, e_role: e_role, e_id: e_id })
-
-    if (!process.env.JWT_SECRET) {
-      throw new Error("JWT_SECRET is missing in environment variables");
-    }
-
-    const token = jwt.sign(
-      { email },
-      process.env.JWT_SECRET as string,
-      { expiresIn: "10h" }
-    );
-
-    return NextResponse.json({ code: 0, message: "Signed up successfully" }, { status: 201 });
-  } catch (error: any) {
-    console.error("Signup error:", error);
-    return NextResponse.json(
-      { message: error.message },
-      { status: 500 }
-    );
-  }
 }

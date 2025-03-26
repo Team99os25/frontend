@@ -1,3 +1,10 @@
+import {
+    ChatMessage,
+    EmployeeContext,
+    EscalationAnalysisParams,
+    LLMResponseWithFlag,
+    SummaryParams,
+} from "@/types/llm";
 import { StringOutputParser } from "@langchain/core/output_parsers";
 import {
     ChatPromptTemplate,
@@ -7,14 +14,6 @@ import {
 import { DynamicStructuredTool } from "@langchain/core/tools";
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { z } from "zod";
-import { ChatMessage } from "./types";
-import {
-    LLMResponseWithFlag,
-    SummaryParams,
-    EscalationAnalysisParams,
-    PastSession,
-    EmployeeContext,
-} from "./types/llm.types";
 
 // Define schemas for function calling
 const endSessionSchema = z.object({
@@ -107,6 +106,7 @@ Your goal is to ask ONLY relevant questions based on their recent work data and 
     }
 
     async processMessage(
+        message: string,
         chatHistory: ChatMessage[]
     ): Promise<LLMResponseWithFlag> {
         const llmWithTools = this.llm.bindTools([this.endSessionTool]);
@@ -135,7 +135,7 @@ Rules:
         ]);
 
         const chain = prompt.pipe(llmWithTools);
-        const response = await chain.invoke({});
+        const response = await chain.invoke(message);
 
         let endSession = false;
         let messageContent = response.content;
@@ -220,36 +220,5 @@ Use the analyze_hr_escalation function to provide your assessment.`;
                       `Assistant: ${msg.content}`
                   )
         );
-    }
-
-    private formatPastSessions(pastSessions: PastSession[]): string {
-        if (!pastSessions || pastSessions.length === 0) {
-            return "No past sessions available. This may be the employee's first check-in.";
-        }
-
-        return pastSessions
-            .map((session, index) => {
-                const date = new Date(session.created_at).toDateString();
-                return `Session ${index + 1} (${date}):
-    Summary: ${session.chat_summary || "No summary available."}
-    
-    ${
-        session.wellbeing_chat_history &&
-        session.wellbeing_chat_history.length > 0
-            ? `Key Points:\n${session.wellbeing_chat_history
-                  .slice(0, 3)
-                  .map(
-                      (qa) =>
-                          `- Q: ${qa.question.substring(
-                              0,
-                              100
-                          )}... A: ${qa.answer.substring(0, 100)}...`
-                  )
-                  .join("\n")}`
-            : "No conversation history available for this session."
-    }
-    `;
-            })
-            .join("\n\n");
     }
 }
