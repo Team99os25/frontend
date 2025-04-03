@@ -13,7 +13,7 @@ const validationSchema = Yup.object({
 }).required();
 type FormData = Yup.InferType<typeof validationSchema>;
 
-const Login = () => {
+const HRLogin = () => {
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
     resolver: yupResolver(validationSchema),
     defaultValues: {
@@ -98,4 +98,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default HRLogin;

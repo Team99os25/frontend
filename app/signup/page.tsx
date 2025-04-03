@@ -22,7 +22,7 @@ const validationSchema = Yup.object({
 }).required();
 type FormData = Yup.InferType<typeof validationSchema>;
 
-const SignupPage = () => {
+const Signup = () => {
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
     resolver: yupResolver(validationSchema),
     defaultValues: {
@@ -173,4 +173,4 @@ const SignupPage = () => {
   );
 };
 
-export default SignupPage;
+export default Signup;

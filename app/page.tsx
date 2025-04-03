@@ -1,3 +1,4 @@
+import EmployeeDashboard from "@/app/employee/page";
 import Hero from "@/components/Hero";
 
 
