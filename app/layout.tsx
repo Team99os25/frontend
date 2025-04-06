@@ -43,9 +43,9 @@ export default function RootLayout({ children, }: { children: React.ReactNode; }
     <html suppressHydrationWarning lang="en">
       <head />
       <body className={` ${inter.className}`}>
-        <Header />
+        {/* <Header /> */}
         {children}
-        <Footer />
+        {/* <Footer /> */}
       </body>
     </html>
   );
