@@ -21,6 +21,8 @@ export default {
         moveUpResetFade: "moveUpResetFade 2s linear infinite",
         colorChange: "colorChange 2s ease-in-out infinite",
         fadeSlide: "fadeSlide 0.6s ease-in-out",
+        typing: "typing 2s steps(30, end) forwards",
+        blink: "blink 1s step-end infinite",
       },
       keyframes: {
         moveRight: {
@@ -57,6 +59,13 @@ export default {
           "0%": { opacity: "0", transform: "translateY(20px)" },
           "50%": { opacity: "0.5" },
           "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+        typing: {
+          from: { width: "0" },
+          to: { width: "100%" },
+        },
+        blink: {
+          "50%": { borderColor: "transparent" },
         },
       },
     },
