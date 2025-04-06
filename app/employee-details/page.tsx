@@ -22,19 +22,53 @@ const EmployeeDetails = () => {
   return ( 
     <div className="flex flex-col items-center min-h-screen bg-gray-100 p-6 mt-20">
       <div className="flex flex-row">
-        {/* <img src={imageLink} alt="Employee photo" height={200} width={200}/> */}
+        <img src={imageLink} alt="Employee photo" height={200} width={200}/>
         <div className="flex flex-col">
           <h1 className="font-bold text-3xl py-3 px-2 rounded-md text-gray-800 animate-none text-center">{employeeName}</h1>
           <p className="my-5 text-gray-700 animate-fadeSlide">{employeeSummary}</p>
         </div>
       </div>
       <div className="flex flex-row mt-4">
-        <div className="py-2 w-1/6 mx-2 bg-gray-800 text-center rounded-md text-gray-50">Number of leaves: {numberOfLeaves}</div>
-        <div className="py-2 w-1/6 mx-2 bg-gray-800 text-center rounded-md text-gray-50">Performance Score: {performanceScore}</div>
-        <div className="py-2 w-1/6 mx-2 bg-gray-800 text-center rounded-md text-gray-50">Number of sessions missed: {sessionMissed}</div>
-        <div className="py-2 w-1/6 mx-2 bg-gray-800 text-center rounded-md text-gray-50">Last session taken: {lastSessionDate}</div>
-        <div className="py-2 w-1/6 mx-2 bg-gray-800 text-center rounded-md text-gray-50">Mood of the Employee: {moods.Happy}</div>
-        <div className="py-2 w-1/6 mx-2 bg-gray-800 text-center rounded-md text-gray-50">Reason of the mood: </div>
+        <div className="py-2 w-1/6 mx-2 bg-gray-800 text-center rounded-md text-gray-50">
+          Latest Mood
+          <ul className="flex flex-col items-center justify-center bg-gray-300 h-full text-gray-900">
+            <li>Scale</li>
+            <li>Emotion</li>
+            <li>Last 10 days</li>
+          </ul>
+        </div>
+        <div className="py-2 w-1/6 mx-2 bg-gray-800 text-center rounded-md text-gray-50">
+          Leaves
+          <ul className="flex flex-col items-center justify-center bg-gray-300 h-full">
+            <li>Start date to end date</li>
+            <li>Reason</li>
+            <li>Number of days</li>
+          </ul>
+        </div>
+        <div className="py-2 w-1/6 mx-2 bg-gray-800 text-center rounded-md text-gray-50">
+          Rewards
+          <ul className="flex flex-col items-center justify-center bg-gray-300 h-full">
+          <li>Reward</li>
+          <li>Period</li>
+          </ul>
+        </div>
+        <div className="py-2 w-1/6 mx-2 bg-gray-800 text-center rounded-md text-gray-50">
+          Performance
+          <ul className="flex flex-col items-center justify-center bg-gray-300 h-full">
+          <li>Rating</li>
+          <li>Period</li>
+          <li>Manager Feedback</li>
+          <li>Promotion Consideration</li>
+          </ul>
+        </div>
+        <div className="py-2 w-1/6 mx-2 bg-gray-800 text-center rounded-md text-gray-50">
+          Activity
+          <ul className="flex flex-col items-center justify-center bg-gray-300 h-full">
+            <li>Emails Sent</li>
+            <li>Working Hours</li>
+            <li>Last 10 days</li>
+          </ul>
+        </div>
       </div>
     </div>
   );
