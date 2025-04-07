@@ -54,10 +54,10 @@ export default function SessionPage() {
 
     useEffect(() => {
         if (!session_id) return;
-    
+
         // Add abort controller to prevent race conditions
         const abortController = new AbortController();
-        
+
         const fetchSession = async () => {
             try {
                 const [allSessionsResponse, sessionResponse] = await Promise.all([
@@ -72,24 +72,24 @@ export default function SessionPage() {
                         withCredentials: true,
                     })
                 ]);
-    
+
                 // Only proceed if not aborted
                 if (!abortController.signal.aborted) {
                     setAllSessions(allSessionsResponse.data);
                     setSessionData(sessionResponse.data);
-                    
+
                     if (sessionResponse.data.status === "completed") {
                         setConversationCompleted(true);
                     }
-    
+
                     const messagesResponse = await axios.get(
                         `${process.env.NEXT_PUBLIC_API_URL}/conversation/${session_id}`, {
-                            signal: abortController.signal,
-                            validateStatus: (status) => status < 600,
-                            withCredentials: true,
-                        }
+                        signal: abortController.signal,
+                        validateStatus: (status) => status < 600,
+                        withCredentials: true,
+                    }
                     );
-    
+
                     if (messagesResponse.data) {
                         const messagesData = messagesResponse.data.conversations;
                         const formattedMessages = messagesData.map((message: any) => ({
@@ -98,7 +98,7 @@ export default function SessionPage() {
                             text: message.conversation,
                             timestamp: new Date(message.created_at),
                         }));
-    
+
                         // Replace instead of append to prevent duplicates
                         setMessages(formattedMessages);
                     }
@@ -114,9 +114,9 @@ export default function SessionPage() {
                 }
             }
         };
-    
+
         fetchSession();
-    
+
         // Cleanup function
         return () => {
             abortController.abort();
@@ -138,7 +138,7 @@ export default function SessionPage() {
             const response = await axios.post(
                 `${process.env.NEXT_PUBLIC_API_URL}/conversation/${session_id}`,
                 payload,
-                 {
+                {
                     validateStatus: (status) => {
                         return status < 600;
                     },
@@ -236,7 +236,14 @@ export default function SessionPage() {
                                                 : 'bg-gray-50 text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:border-gray-200 border-gray-200 shadow-sm transform hover:scale-101'}
                         `}
                                     >
-                                        <span className="truncate text-lg">{` ${new Date(session.started_at).toLocaleDateString()}`}</span>
+                                        <span className="truncate text-lg">
+                                            {new Date(session.started_at).toLocaleDateString('en-US', {
+                                                year: 'numeric',
+                                                month: 'short',
+                                                day: 'numeric',
+                                            })}
+                                        </span>
+
                                     </a>
                                 </li>
                             ))}
@@ -266,8 +273,13 @@ export default function SessionPage() {
                     <div className="flex items-center justify-between">
                         <div>
                             <h2 className="text-xl font-bold text-gray-800">
-                                {`Employee Wellbeing Session On ${new Date(sessionData.started_at).toLocaleDateString()}`}
+                                {`Employee Wellbeing Session on ${new Date(sessionData.started_at).toLocaleDateString('en-US', {
+                                    year: 'numeric',
+                                    month: 'short',
+                                    day: 'numeric',
+                                })}`}
                             </h2>
+
                         </div>
                         <div
                             className={`inline-flex items-center px-4 py-1.5 border border-gray-300 rounded-md text-sm font-medium ${sessionData.status === 'active'
