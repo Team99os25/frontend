@@ -44,7 +44,7 @@ export default function SessionPage() {
     const [error, setError] = useState("");
     const [empId, setEmpId] = useState<string | null>(null);
     const [messages, setMessages] = useState<any[]>([]);
-    const [introMessages, setIntroMessages] = useState<any[]>([]);
+    const [tempMessage, setTempMessage] = useState("")
     const [newMessage, setNewMessage] = useState("");
     const [conversationCompleted, setConversationCompleted] = useState(false);
     const [isSending, setIsSending] = useState(false);
@@ -54,89 +54,74 @@ export default function SessionPage() {
 
     useEffect(() => {
         if (!session_id) return;
-
+    
+        // Add abort controller to prevent race conditions
+        const abortController = new AbortController();
+        
         const fetchSession = async () => {
             try {
                 const [allSessionsResponse, sessionResponse] = await Promise.all([
                     axios.get(`${process.env.NEXT_PUBLIC_API_URL}/sessions/employee/`, {
-                        validateStatus: (status) => {
-                            return status < 600;
-                        },
+                        signal: abortController.signal,
+                        validateStatus: (status) => status < 600,
                         withCredentials: true,
-                    },),
+                    }),
                     axios.get(`${process.env.NEXT_PUBLIC_API_URL}/sessions/employee/${session_id}`, {
-                        validateStatus: (status) => {
-                            return status < 600;
-                        },
+                        signal: abortController.signal,
+                        validateStatus: (status) => status < 600,
                         withCredentials: true,
-                    },)
+                    })
                 ]);
-                console.log('sessionResponse:', sessionResponse.data);
-
-                setAllSessions(allSessionsResponse.data);
-                setSessionData(sessionResponse.data);
-                if (sessionResponse.data.status === "completed") {
-                    setConversationCompleted(true);
-                }
-
-                setIntroMessages((prevMessages) => [
-                    ...prevMessages,
-                    {
-                        id: sessionResponse.data.id,
-                        sent_by: 'ai',
-                        text: sessionResponse.data.initial_conversation,
-                        timestamp: new Date(sessionResponse.data.started_at),
-                    },
-                    {
-                        id: prevMessages.length + 1,
-                        sent_by: 'ai',
-                        text: "Lets gets started for today's session...",
-                        timestamp: new Date(),
-                    },
-                ]);
-
-
-                try {
+    
+                // Only proceed if not aborted
+                if (!abortController.signal.aborted) {
+                    setAllSessions(allSessionsResponse.data);
+                    setSessionData(sessionResponse.data);
+                    
+                    if (sessionResponse.data.status === "completed") {
+                        setConversationCompleted(true);
+                    }
+    
                     const messagesResponse = await axios.get(
                         `${process.env.NEXT_PUBLIC_API_URL}/conversation/${session_id}`, {
-                            validateStatus: (status) => {
-                                return status < 600;
-                            },
+                            signal: abortController.signal,
+                            validateStatus: (status) => status < 600,
                             withCredentials: true,
-                        },
+                        }
                     );
-
+    
                     if (messagesResponse.data) {
                         const messagesData = messagesResponse.data.conversations;
-                        console.log('Fetched messages:', messagesData);
                         const formattedMessages = messagesData.map((message: any) => ({
                             id: message.id,
                             sent_by: message.sent_by,
                             text: message.conversation,
                             timestamp: new Date(message.created_at),
                         }));
-
-                        setMessages((prevMessages) => [
-                            ...prevMessages,
-                            ...formattedMessages,
-                        ]);
-                    } else {
-                        console.log('No valid conversations data available.');
+    
+                        // Replace instead of append to prevent duplicates
+                        setMessages(formattedMessages);
                     }
-                } catch (error) {
-                    console.error('Error fetching messages:', error);
                 }
-
             } catch (err) {
-                console.error("Failed to load session:", err);
-                setError("Failed to load session. Please try again.");
+                if (!abortController.signal.aborted) {
+                    console.error("Failed to load session:", err);
+                    setError("Failed to load session. Please try again.");
+                }
             } finally {
-                setLoading(false);
+                if (!abortController.signal.aborted) {
+                    setLoading(false);
+                }
             }
         };
-
+    
         fetchSession();
-    }, [session_id, empId]);
+    
+        // Cleanup function
+        return () => {
+            abortController.abort();
+        };
+    }, [session_id]);  // Add session_id as dependency
 
     const handleSendMessage = async () => {
         if (!newMessage.trim()) return;
@@ -147,7 +132,8 @@ export default function SessionPage() {
         };
 
         setIsSending(true);
-
+        setTempMessage(newMessage);
+        setNewMessage("");
         try {
             const response = await axios.post(
                 `${process.env.NEXT_PUBLIC_API_URL}/conversation/${session_id}`,
@@ -182,10 +168,12 @@ export default function SessionPage() {
             addMessage(user_message);
             addMessage(ai_message);
 
+
         } catch (error) {
             console.error("Error sending message:", error);
         } finally {
             setNewMessage("");
+            setTempMessage("");
             setIsSending(false);
         }
     };
@@ -299,37 +287,6 @@ export default function SessionPage() {
 
                 <div className="flex-1 overflow-y-auto p-2 bg-gray-50">
                     <div className="max-w-6xl mx-auto space-y-4">
-                        <div className="intro-messages-section max-w-5xl mx-auto ">
-                            <div className="p-6">
-                                {introMessages.map((message, index) => (
-                                    <div
-                                        key={index}
-                                        className={`my-6 ${index === 1 ? 'animate-moveRight' : ''}`}
-                                        style={{ animationDelay: `${index * 0.1}s` }}
-                                    >
-                                        <div className="flex justify-center">
-                                            <div className="relative max-w-3xl">
-                                                <div
-                                                    className={`relative inline-block px-8 py-6 rounded-2xl shadow-lg
-                                                    bg-gradient-to-r from-blue-50 to-indigo-100
-                                                    border border-blue-200
-                                                    text-gray-800 before:absolute before:-left-3 before:top-4 before:w-5 before:h-5 
-                                                    before:bg-blue-50 before:border-l before:border-b before:border-blue-200
-                                                    before:rotate-45 before:rounded-sm`}
-                                                >
-                                                    <p className="leading-relaxed font-semibold">{message.text}</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-
-                            </div>
-                        </div>
-
-
-
-
 
                         {messages.map((message) => (
                             <div
@@ -368,6 +325,28 @@ export default function SessionPage() {
                                 </div>
                             </div>
                         ))}
+                        {tempMessage && (
+                            <div className="flex justify-end">
+                                <div className="bg-green-100 rounded-lg px-4 py-2">
+                                    <div className="flex items-center">
+                                        <div className="mr-2">
+                                            <UserIcon />
+                                        </div>
+                                        <div className="text-sm">{tempMessage}</div>
+                                    </div>
+                                    <p className="text-xs mt-1">
+                                        {new Date().toLocaleString('en-US', {
+                                            month: 'short',
+                                            day: 'numeric',
+                                            year: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit',
+                                            hour12: true
+                                        })}
+                                    </p>
+                                </div>
+                            </div>
+                        )}
                         {isSending && (
                             <div className="flex justify-start">
                                 <div className="bg-white border border-gray-200 text-gray-800 rounded-lg px-4 py-2 flex items-center">
