@@ -133,3 +133,9 @@ export async function GET() {
   
   return Response.json(data);
 }
+
+module.exports = {
+  images: {
+    remotePatterns: [new URL('https://assets.example.com/account123/**')],
+  },
+}
