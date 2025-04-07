@@ -1,7 +1,12 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import axios from "axios";
@@ -15,15 +20,17 @@ const Vibemeter = () => {
     const [selectedMood, setSelectedMood] = useState<string | null>(null);
     const [moods, setMoods] = useState({
         Frustrated: 0,
-        Sad: 0, 
+        Sad: 0,
         Okay: 0,
         Happy: 0,
         Excited: 0,
     });
-    const [isVibeMeterOpen, setIsVibeMeterOpen] = useState(false);
+    const [isVibeMeterOpen, setIsVibeMeterOpen] = useState(true);
     const [isCheckingIntervention, setIsCheckingIntervention] = useState(false);
     const [showChat, setShowChat] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [allSessions, setAllSessions] = useState([]);
+
 
     useEffect(() => {
         const userDetails = localStorage.getItem("userDetails");
@@ -31,6 +38,26 @@ const Vibemeter = () => {
             router.push("/signin");
             return;
         }
+
+        const checkUser = async () => {
+            try {
+                const response = await axios.get(
+                    `${process.env.NEXT_PUBLIC_API_URL}/auth/check`,
+                    {
+                        validateStatus: (status) => {
+                            return status < 600;
+                        },
+                        withCredentials: true,
+                    },
+                );
+                if (response.status == 200) {
+                    setIsVibeMeterOpen(response.data.isVibeMeterOpen);
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        };
+        checkUser();
 
         const fetchVibeMeterState = async () => {
             try {
@@ -40,7 +67,7 @@ const Vibemeter = () => {
                         validateStatus: (status) => {
                             return status < 600;
                         },
-                    }
+                    },
                 );
                 // setIsVibeMeterOpen(response.data.isVibeMeterOpen);
             } catch (error) {
@@ -51,6 +78,29 @@ const Vibemeter = () => {
 
         fetchVibeMeterState();
     }, [router]);
+
+    useEffect(() => {
+        const fetchSession = async () => {
+            try {
+                const [allSessionsResponse] = await Promise.all([
+                    axios.get(`${process.env.NEXT_PUBLIC_API_URL}/sessions/employee/`, {
+                        validateStatus: (status) => status < 600,
+                        withCredentials: true, // sends cookies
+                    }),
+                ]);
+
+                console.log('sessionResponse:', allSessionsResponse.data);
+                setAllSessions(allSessionsResponse.data);
+
+            } catch (err) {
+                console.error("Failed to load session:", err);
+            }
+        };
+        fetchSession();
+    }, []);
+
+
+
 
     const handleMoodSelect = (mood: string) => {
         if (selectedMood && selectedMood !== mood) {
@@ -73,46 +123,57 @@ const Vibemeter = () => {
         return Object.values(moods).some((value) => value !== 0);
     };
 
-    const chatRequired = async () => {
-        setIsCheckingIntervention(true);
-        try {
-            const response = await axios.post(
-                "http://localhost:3000/api/user/intervention",
-                moods,
-                {
-                    validateStatus: (status) => {
-                        return status < 600;
-                    },
-                }
-            );
-            
-            if (response.data.requiresIntervention === false) {
-                setIsCheckingIntervention(false);
-                setIsVibeMeterOpen(false);
-            } else {
-                setIsCheckingIntervention(false);
-                setShowChat(true);
-            }
-        } catch (error) {
-            console.error(error);
-            setIsCheckingIntervention(false);
-            toast.error("Something went wrong!");
-        }
-    };
-
     const handleLogout = () => {
         localStorage.removeItem("userDetails");
         router.push("/signin");
     };
+
+    const handleSubmitMood = async () => {
+        // Get auth_token from cookies
+        const cookies = document.cookie.split(';');
+        const authToken = cookies
+            .find(cookie => cookie.trim().startsWith('auth_token='))
+            ?.split('=')[1];
+        console.log(cookies)
+
+        const payload = {
+            mood: selectedMood,
+            scale: Object.values(moods).find(value => value !== 0) || 0,
+        }
+        try {
+            const response = await axios.post(
+                `${process.env.NEXT_PUBLIC_API_URL}/vibemeter/submit`,
+                payload,
+                {
+                    validateStatus: (status) => {
+                        return status < 600;
+                    },
+                    withCredentials: true,
+                },
+            );
+            console.log(response)
+
+            if (response.status == 200) {
+                toast.success(response.data.message);
+                if (response.data.intervention_needed) {
+                    router.push(`/sessions/${response.data.session_id}`);
+                }
+            }
+            else {
+                toast.error(response.data.message);
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    }
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-[#1e2337] via-[#2b3558] to-[#1e2337] relative">
             <Button
                 variant="ghost"
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                className={`fixed top-2 z-[60] p-4 text-white md:hidden transition-all duration-300 ease-in-out ${
-                    isSidebarOpen ? "left-[264px]" : "left-2"
-                } hover:bg-white/10`}
+                className={`fixed top-2 z-[60] p-4 text-white md:hidden transition-all duration-300 ease-in-out ${isSidebarOpen ? "left-[264px]" : "left-2"
+                    } hover:bg-white/10`}
             >
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -125,51 +186,42 @@ const Vibemeter = () => {
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         strokeWidth={2}
-                        d={isSidebarOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"}
+                        d={isSidebarOpen
+                            ? "M6 18L18 6M6 6l12 12"
+                            : "M4 6h16M4 12h16M4 18h16"}
                     />
                 </svg>
             </Button>
 
             <div
-                className={`w-64 bg-[#151823] backdrop-blur-xl text-white overflow-hidden fixed top-0 left-0 h-screen z-[55] transition-transform duration-300 ease-in-out transform md:translate-x-0 ${
-                    isSidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
-                } border-r border-white/10`}
+                className={`w-64 bg-[#151823] backdrop-blur-xl text-white overflow-hidden fixed top-0 left-0 h-screen z-[55] transition-transform duration-300 ease-in-out transform md:translate-x-0 ${isSidebarOpen
+                    ? "translate-x-0"
+                    : "-translate-x-full md:translate-x-0"
+                    } border-r border-white/10`}
             >
                 <ScrollArea className="h-full p-6">
                     <h2 className="text-2xl font-bold mb-8 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-teal-400">
                         Vibe History
                     </h2>
                     <nav className="space-y-4 flex-1">
-                        <Link
-                            href="/title1"
-                            className="block p-3 hover:bg-[#2b3558]/50 rounded-lg transition-all duration-200 border-b border-white/10"
-                        >
-                            <div className="flex items-center space-x-3">
-                                <span className="w-2 h-2 rounded-full bg-teal-400"></span>
-                                <span>Previous Vibe 1</span>
-                            </div>
-                        </Link>
-                        <Link
-                            href="/title1"
-                            className="block p-3 hover:bg-[#2b3558]/50 rounded-lg transition-all duration-200 border-b border-white/10"
-                        >
-                            <div className="flex items-center space-x-3">
-                                <span className="w-2 h-2 rounded-full bg-teal-400"></span>
-                                <span>Previous Vibe 2</span>
-                            </div>
-                        </Link>
-                        <Link
-                            href="/title1"
-                            className="block p-3 hover:bg-[#2b3558]/50 rounded-lg transition-all duration-200 border-b border-white/10"
-                        >
-                            <div className="flex items-center space-x-3">
-                                <span className="w-2 h-2 rounded-full bg-teal-400"></span>
-                                <span>Previous Vibe 3</span>
-                            </div>
-                        </Link>
+                        {allSessions.map((session: any) => (
+                            <Link
+                                key={session.id}
+                                href={`/sessions/${session.id}`}
+
+                            >
+                                <div className="flex items-center space-x-3">
+                                    <span className="w-2 h-2 rounded-full bg-teal-400" />
+                                    <span className="truncate">
+                                        {`Vibe - ${new Date(session.started_at).toLocaleDateString()}`}
+                                    </span>
+                                </div>
+                            </Link>
+                        ))}
                     </nav>
-                    <Button 
-                        variant="outline" 
+
+                    <Button
+                        variant="outline"
                         className="mt-8 w-full bg-transparent text-white border-white/20
                             hover:bg-gradient-to-r hover:from-red-500 hover:to-red-600
                             hover:border-transparent transition-all duration-300"
@@ -181,7 +233,7 @@ const Vibemeter = () => {
             </div>
 
             <div className="min-h-screen md:ml-64 transition-all duration-300">
-                <Dialog open={isLoading} onOpenChange={() => {}}>
+                <Dialog open={isLoading} onOpenChange={() => { }}>
                     <DialogContent className="bg-[#1e2337]/90 border-white/20 text-white backdrop-blur-xl">
                         <DialogHeader>
                             <DialogTitle className="text-2xl font-semibold text-center">
@@ -189,7 +241,8 @@ const Vibemeter = () => {
                             </DialogTitle>
                             <div className="flex flex-col items-center space-y-6 py-4">
                                 <div className="relative w-20 h-20">
-                                    <div className="absolute top-0 left-0 w-full h-full border-4 border-blue-400/30 rounded-full animate-spin border-t-blue-400"></div>
+                                    <div className="absolute top-0 left-0 w-full h-full border-4 border-blue-400/30 rounded-full animate-spin border-t-blue-400">
+                                    </div>
                                 </div>
                                 <p className="text-gray-400">
                                     Preparing your personalized experience...
@@ -203,14 +256,18 @@ const Vibemeter = () => {
                     <div className="fixed inset-0 bg-white z-[45] animate-fadeIn">
                         <div className="h-full flex flex-col">
                             <div className="bg-blue-600 text-white p-4">
-                                <h2 className="text-xl font-semibold text-center">Chat with Counselor</h2>
+                                <h2 className="text-xl font-semibold text-center">
+                                    Chat with Counselor
+                                </h2>
                             </div>
 
                             <div className="flex-1 overflow-y-auto p-4">
                                 <div className="space-y-4">
                                     <div className="bg-blue-100 rounded-lg p-4 max-w-md ml-auto">
                                         <p className="text-gray-800">
-                                            Hi, I noticed you might want to talk. I'm here to listen and help.
+                                            Hi, I noticed you might want to
+                                            talk. I&apos;m here to listen and
+                                            help.
                                         </p>
                                     </div>
                                 </div>
@@ -237,26 +294,32 @@ const Vibemeter = () => {
                         <div className="bg-[#2b3558]/90 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl w-full max-w-xl mx-4 animate-fadeIn">
                             <div className="p-4 md:p-6 border-b border-white/20">
                                 <h2 className="text-3xl md:text-4xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-teal-300">
-                                    How's Your Vibe Today?
+                                    How&apos;s Your Vibe Today?
                                 </h2>
                                 <p className="text-center text-blue-100/80 mt-2 text-base md:text-lg">
-                                    Select your mood (only one option is required)
+                                    Select your mood (only one option is
+                                    required)
                                 </p>
                             </div>
 
                             <div className="p-4 md:p-6">
                                 <div className="space-y-3">
-                                    {Object.entries(moods).map(([mood, value]) => (
+                                    {Object.entries(moods).map((
+                                        [mood, value],
+                                    ) => (
                                         <div
                                             key={mood}
                                             className={`bg-[#2b3558]/80 p-3 md:p-4 rounded-xl border-2 cursor-pointer 
                                                 transition-all duration-300 hover:border-blue-400 
                                                 ${selectedMood === mood
                                                     ? "ring-2 ring-blue-400 border-blue-400"
-                                                    : value ? "border-teal-400" : "border-white/20"
+                                                    : value
+                                                        ? "border-teal-400"
+                                                        : "border-white/20"
                                                 }
                                                 transform hover:scale-[1.02]`}
-                                            onClick={() => handleMoodSelect(mood)}
+                                            onClick={() =>
+                                                handleMoodSelect(mood)}
                                         >
                                             <div className="flex justify-between items-center">
                                                 <span className="font-semibold text-lg text-blue-100">
@@ -265,13 +328,21 @@ const Vibemeter = () => {
                                             </div>
                                             {selectedMood === mood && (
                                                 <div className="flex gap-2 mt-3">
-                                                    {[1, 2, 3, 4, 5, 6].map((rating) => (
+                                                    {[1, 2, 3, 4, 5, 6].map((
+                                                        rating,
+                                                    ) => (
                                                         <Button
                                                             key={rating}
-                                                            variant={value === rating ? "default" : "secondary"}
+                                                            variant={value ===
+                                                                rating
+                                                                ? "default"
+                                                                : "secondary"}
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
-                                                                handleMoodChange(mood, rating);
+                                                                handleMoodChange(
+                                                                    mood,
+                                                                    rating,
+                                                                );
                                                             }}
                                                             disabled={isSubmitted}
                                                             className={`flex-1 h-9 text-base font-medium
@@ -291,8 +362,9 @@ const Vibemeter = () => {
 
                                 <div className="flex justify-center mt-4">
                                     <Button
-                                        onClick={chatRequired}
-                                        disabled={isSubmitted || !areAllMoodsSelected()}
+                                        onClick={handleSubmitMood}
+                                        disabled={isSubmitted ||
+                                            !areAllMoodsSelected()}
                                         className={`px-6 h-10 text-base font-semibold
                                             ${areAllMoodsSelected()
                                                 ? "bg-gradient-to-r from-blue-500 to-blue-400 text-white hover:from-blue-600 hover:to-blue-500"
@@ -311,38 +383,47 @@ const Vibemeter = () => {
                     <div className="flex flex-col items-center justify-center min-h-screen p-6">
                         <div className="text-center space-y-10 animate-fadeIn">
                             <div className="animate-bounce-slow">
-                                <svg 
-                                    xmlns="http://www.w3.org/2000/svg" 
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
                                     className="h-32 w-32 text-teal-300 mx-auto"
-                                    viewBox="0 0 24 24" 
-                                    fill="none" 
-                                    stroke="currentColor" 
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
                                     strokeWidth="2"
-                                    strokeLinecap="round" 
+                                    strokeLinecap="round"
                                     strokeLinejoin="round"
                                 >
                                     <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3" />
                                 </svg>
                             </div>
-                            
+
                             <div className="space-y-6">
                                 <h2 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-teal-300">
                                     Awesome Vibes!
                                 </h2>
                                 <p className="text-xl text-blue-100 max-w-md mx-auto">
-                                    Keep that positive energy flowing. Every moment is an opportunity to elevate your vibe!
+                                    Keep that positive energy flowing. Every
+                                    moment is an opportunity to elevate your
+                                    vibe!
                                 </p>
-                                
+
                                 <div className="pt-8">
                                     <div className="flex flex-wrap justify-center gap-4">
-                                        {['Stay Focused', 'Stay Strong', 'Stay Positive'].map((text, i) => (
-                                            <div key={text} 
+                                        {[
+                                            "Stay Focused",
+                                            "Stay Strong",
+                                            "Stay Positive",
+                                        ].map((text, i) => (
+                                            <div
+                                                key={text}
                                                 className="flex items-center bg-[#2b3558]/80 px-6 py-3 rounded-xl 
                                                     border border-white/20 transition-all duration-300 
                                                     hover:scale-105 hover:bg-[#2b3558] hover:border-blue-400/50
                                                     text-blue-100 hover:shadow-lg hover:shadow-blue-500/10"
                                             >
-                                                <span className="mr-2">{['🎯', '💪', '✨'][i]}</span>
+                                                <span className="mr-2">
+                                                    {["🎯", "💪", "✨"][i]}
+                                                </span>
                                                 {text}
                                             </div>
                                         ))}
@@ -353,7 +434,7 @@ const Vibemeter = () => {
                     </div>
                 )}
             </div>
-            
+
             <Toaster />
         </div>
     );

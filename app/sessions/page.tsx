@@ -6,31 +6,16 @@ export default function Sessions() {
     const [allSessions, setAllSessions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
-    const [empId, setEmpId] = useState<string | null>(null);
+
+
 
     useEffect(() => {
-        const emp_id = sessionStorage.getItem("emp_id");
-        if (emp_id) {
-            setEmpId(emp_id);
-        } else {
-            const userDetailsString = localStorage.getItem("UserDetails");
-            if (userDetailsString) {
-                try {
-                    const userDetails = JSON.parse(userDetailsString);
-                    setEmpId(userDetails?.emp_id || null);
-                } catch (err) {
-                    console.error("Error parsing UserDetails:", err);
-                }
-            }
-        }
-    }, []);
-
-    useEffect(() => {
-        if (!empId) return;
-
         const fetchSession = async () => {
             try {
-                const allSessionsResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/sessions/${empId}`);
+                const allSessionsResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/sessions/employee`, {
+                    withCredentials: true,
+                });
+                
                 setAllSessions(allSessionsResponse.data);
             } catch (err) {
                 console.error("Failed to load session:", err);
@@ -41,7 +26,7 @@ export default function Sessions() {
         };
 
         fetchSession();
-    }, [empId]);
+    }, []);
 
     if (loading) {
         return (
