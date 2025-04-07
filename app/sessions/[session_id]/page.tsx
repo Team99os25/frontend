@@ -51,34 +51,27 @@ export default function SessionPage() {
     const chatEndRef = useRef<HTMLDivElement>(null);
 
 
-    useEffect(() => {
-        const emp_id = sessionStorage.getItem("emp_id");
-        if (emp_id) {
-            setEmpId(emp_id);
-        } else {
-            const userDetailsString = localStorage.getItem("UserDetails");
-            if (userDetailsString) {
-                try {
-                    const userDetails = JSON.parse(userDetailsString);
-                    setEmpId(userDetails?.emp_id || null);
-                } catch (err) {
-                    console.error("Error parsing UserDetails:", err);
-                }
-            }
-        }
-    }, []);
-
 
     useEffect(() => {
-        if (!session_id || !empId) return;
+        if (!session_id) return;
 
         const fetchSession = async () => {
             try {
                 const [allSessionsResponse, sessionResponse] = await Promise.all([
-                    axios.get(`${process.env.NEXT_PUBLIC_API_URL}/sessions/${empId}`),
-                    axios.get(`${process.env.NEXT_PUBLIC_API_URL}/sessions/${empId}/${session_id}`)
+                    axios.get(`${process.env.NEXT_PUBLIC_API_URL}/sessions/employee/`, {
+                        validateStatus: (status) => {
+                            return status < 600;
+                        },
+                        withCredentials: true,
+                    },),
+                    axios.get(`${process.env.NEXT_PUBLIC_API_URL}/sessions/employee/${session_id}`, {
+                        validateStatus: (status) => {
+                            return status < 600;
+                        },
+                        withCredentials: true,
+                    },)
                 ]);
-                console.log('sessionResponse:', sessionResponse.data.status);
+                console.log('sessionResponse:', sessionResponse.data);
 
                 setAllSessions(allSessionsResponse.data);
                 setSessionData(sessionResponse.data);
@@ -105,7 +98,12 @@ export default function SessionPage() {
 
                 try {
                     const messagesResponse = await axios.get(
-                        `${process.env.NEXT_PUBLIC_API_URL}/conversation/${empId}/${session_id}`
+                        `${process.env.NEXT_PUBLIC_API_URL}/conversation/${session_id}`, {
+                            validateStatus: (status) => {
+                                return status < 600;
+                            },
+                            withCredentials: true,
+                        },
                     );
 
                     if (messagesResponse.data) {
@@ -153,7 +151,13 @@ export default function SessionPage() {
         try {
             const response = await axios.post(
                 `${process.env.NEXT_PUBLIC_API_URL}/conversation/${session_id}`,
-                payload
+                payload,
+                 {
+                    validateStatus: (status) => {
+                        return status < 600;
+                    },
+                    withCredentials: true,
+                },
             );
 
             const { user_message, ai_message, status } = response.data;

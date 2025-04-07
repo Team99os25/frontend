@@ -8,11 +8,12 @@ import axios from 'axios'
 import { toast, Toaster } from "react-hot-toast";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 
 const validationSchema = Yup.object({
-  email: Yup.string().email("Invalid email").required("Required"),
+  employee_id: Yup.string().required("Employee ID is required"),
   password: Yup.string().min(8, "At least 8 characters").required("Required"),
-  e_role: Yup.string().oneOf(["HR", "Employee"], "Select a valid role").required("Required"),
+  role: Yup.string().oneOf(["hr", "employee"], "Select a valid role").required("Required"),
 }).required();
 type FormData = Yup.InferType<typeof validationSchema>;
 
@@ -21,7 +22,7 @@ const Login = () => {
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
     resolver: yupResolver(validationSchema),
     defaultValues: {
-      email: "",
+      employee_id: "",
       password: "",
     }
   });
@@ -36,17 +37,20 @@ const Login = () => {
   const submitData = async (data: FormData) => {
     try {
       const AxiosResponse = await axios.post(
-        "http://localhost:3000/api/user/signin",
+        `${process.env.NEXT_PUBLIC_API_URL}/auth/login`,
         data,
         {
           validateStatus: (status) => {
             return status < 600;
           },
+          withCredentials: true,
         })
-      if (AxiosResponse.data.code == 0) {
+        console.log(AxiosResponse)
+        
+      if (AxiosResponse.status == 200) {
         const userDetails = {
-          email: data.email,
-          role: data.e_role,
+          employee_id: data.employee_id,
+          role: data.role,
         };
         localStorage.setItem('userDetails', JSON.stringify(userDetails));
         
@@ -58,71 +62,94 @@ const Login = () => {
       }
     } catch (error) {
       console.log(error)
+      toast.error("An error occurred during sign in");
     }
   };
 
   return (
-    <section className="flex min-h-screen items-center justify-center bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-[#1e2337] via-[#2b3558] to-[#1e2337] flex items-center justify-center p-4">
       <Toaster />
-      <form className="mt-6 space-y-4" onSubmit={handleSubmit(submitData)}>
-        <div className="w-full max-w-md bg-white p-8 shadow-md rounded-lg">
-          <h2 className="text-center text-2xl font-semibold text-gray-900">
-            Sign In
-          </h2>
-
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700">Email</label>
-            <input
-              {...register("email", { required: "Email Address is required" })}
-              aria-invalid={errors.email ? "true" : "false"}
-              type="email"
-              className="w-full mt-1 rounded-md border border-gray-300 p-3 text-gray-900 outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter your email"
-            />
-            {errors.email && (
-              <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>
-            )}
-          </div>
-
-          <div className="mb-4">
-            <label htmlFor="role" className="block text-sm font-medium text-gray-700">
-              Your Role
-            </label>
-            <select
-              {...register("e_role")}
-              id="role"
-              className="mt-1 w-full rounded-lg border border-gray-300 p-3 text-gray-900 shadow-sm outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="HR">HR</option>
-              <option value="Employee">Employee</option>
-            </select>
-            {errors.e_role && (
-              <p className="mt-1 text-sm text-red-500">{errors.e_role.message}</p>
-            )}
-          </div>
-
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700">Password</label>
-            <input {...register('password', { required: "Password is required" })}
-              className="w-full mt-1 rounded-md border border-gray-300 p-3 text-gray-900 outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter your Password"
-              type="password"
-            />
-            {errors.password && (
-              <p className="mt-1 text-sm text-red-500">{errors.password.message}</p>
-            )}
-          </div>
-
-          <button
-            type="submit"
-            onSubmit={handleSubmit((data) => console.log(data))}
-            className="w-full mt-4 rounded-md bg-blue-600 py-3 text-white font-medium hover:bg-blue-700 transition"
-          >
-            Sign In
-          </button>
+      <div className="w-full max-w-md">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-teal-300">
+            Welcome to Vibemeter
+          </h1>
+          <p className="mt-2 text-blue-100/80">
+            Sign in to track and manage your vibes
+          </p>
         </div>
-      </form>
-    </section>
+
+        <form 
+          onSubmit={handleSubmit(submitData)}
+          className="bg-[#151823]/80 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-xl"
+        >
+          <div className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-blue-100 mb-2">
+                Employee ID
+              </label>
+              <input
+                {...register("employee_id")}
+                type="text"
+                className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-blue-100 
+                  placeholder:text-blue-100/50 focus:outline-none focus:ring-2 focus:ring-blue-400/50 
+                  focus:border-transparent transition-all duration-200"
+                placeholder="Enter your Employee ID"
+                autoComplete="off"
+              />
+              {errors.employee_id && (
+                <p className="mt-1 text-sm text-red-400">{errors.employee_id.message}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-blue-100 mb-2">
+                Role
+              </label>
+              <select
+                {...register("role")}
+                className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-blue-100 
+                  focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-transparent 
+                  transition-all duration-200"
+              >
+                <option value="employee" className="bg-[#151823]">Employee</option>
+                <option value="hr" className="bg-[#151823]">HR</option>
+              </select>
+              {errors.role && (
+                <p className="mt-1 text-sm text-red-400">{errors.role.message}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-blue-100 mb-2">
+                Password
+              </label>
+              <input
+                {...register('password')}
+                type="password"
+                className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-blue-100 
+                  placeholder:text-blue-100/50 focus:outline-none focus:ring-2 focus:ring-blue-400/50 
+                  focus:border-transparent transition-all duration-200"
+                placeholder="Enter your password"
+                autoComplete="current-password"
+              />
+              {errors.password && (
+                <p className="mt-1 text-sm text-red-400">{errors.password.message}</p>
+              )}
+            </div>
+
+            <Button
+              type="submit"
+              className="w-full h-12 bg-gradient-to-r from-blue-500 to-blue-400 text-white text-lg
+                hover:from-blue-600 hover:to-blue-500 transition-all duration-300 rounded-lg
+                hover:scale-[1.02] hover:shadow-lg hover:shadow-blue-500/25"
+            >
+              Sign In
+            </Button>
+          </div>
+        </form>
+      </div>
+    </div>
   );
 };
 
