@@ -21,49 +21,49 @@ const HRDashboard = () => {
   return (
     <div className="flex flex-col items-center justify-center h-full">
       {/* <Sidenav elements={["Employee Records", "Payroll Management", "Reports", "Settings", "Logout"]} /> */}
-      <div className="graphs grid grid-cols-3 gap-x-10 gap-y-28 my-20">
+      <div className="graphs grid grid-cols-3 gap-x-10 gap-y-40 my-28">
         <div className='chart-1 h-36'>
-          <div className="chart">
+          <div className="chart mb-2">
             <ConversationsTinyBar />
           </div>
-          <div className="chart-text text-center">
+          <div className="chart-text text-center pl-12">
             Number of Conversations
           </div>
         </div>
         <div className='chart-1 h-36'>
-          <div className="chart">
+          <div className="chart mb-2">
             <EscalationsTinyBar />
           </div>
-          <div className="chart-text text-center">
+          <div className="chart-text text-center pl-12">
             Escalations in the last months
           </div>
         </div>
-        <div className='chart-3 h-36'>
-          <div className="chart">
+        <div className='chart-3 h-36 mt-8'>
+          <div className="chart mb-[26px]">
             <SentimentsPiChart />
           </div>
           <div className="chart-text text-center">
-            Employee Sentiments
+            Employee Sentiments Distribution
           </div>
         </div>
-        <div className='chart-1 h-36'>
-          <div className="chart">
+        <div className='chart-4 h-36'>
+          <div className="chart mb-2">
             <WorkhoursAreaChart />
           </div>
           <div className="chart-text text-center">
             Employee Workhour Distribution
           </div>
         </div>
-        <div className='chart-1 h-36'>
-          <div className="chart">
+        <div className='chart-5 h-36'>
+          <div className="chart mb-2">
             <LeavesSimpleLine />
           </div>
           <div className="chart-text text-center">
             Leaves in the last months
           </div>
         </div>
-        <div className='chart-1 h-36'>
-          <div className="chart">
+        <div className='chart-6 h-36'>
+          <div className="chart mb-2">
             <PerformanceSimpleLine />
           </div>
           <div className="chart-text text-center">

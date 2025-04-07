@@ -24,8 +24,11 @@ export default MyChart = () => (
 import { PieChart, Pie, Tooltip, Cell } from 'recharts';
 
 const data = [
-  { name: 'A', value: 40, color: '#FF0000' },
-  { name: 'B', value: 60, color: '#00FF00' },
+  { name: 'Score 1', value: 5, color: '#CDB4DB' },
+  { name: 'Score 2', value: 15, color: '#FFC8DD' },
+  { name: 'Score 3', value: 25, color: '#FFAFCC' },
+  { name: 'Score 4', value: 45, color: '#BDE0FE' },
+  { name: 'Score 5', value: 10, color: '#A2D2FF' },
 ];
 
 const MyChart = () => {

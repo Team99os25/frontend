@@ -68,7 +68,7 @@ const TableComponent = () => {
   });
 
   return (
-    <div className="p-4 max-w-6xl mx-auto">
+    <div className="p-4 max-w-full mx-auto">
       <h2 className="text-2xl font-semibold mb-4">Employee Sessions Overview</h2>
 
       <input
@@ -79,7 +79,7 @@ const TableComponent = () => {
         className="mb-4 p-2 border border-gray-300 rounded w-full"
       />
 
-      <div className="overflow-x-auto">
+      <div className="table-auto overflow-x-auto">
         <table className="min-w-full bg-white border border-gray-300">
           <thead className="bg-gray-100">
             {table.getHeaderGroups().map(headerGroup => (
