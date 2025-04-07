@@ -11,15 +11,16 @@ interface Employee {
 interface EmployeeListProps {
   title: string;
   employees: Employee[];
+  className?: string;
 }
 
-export function EmployeeList({ title, employees }: EmployeeListProps) {
+export function EmployeeList({ title, employees, className }: EmployeeListProps) {
   return (
-    <Card className="w-full bg-gray-100/90 dark:bg-gray-800/90 backdrop-blur-sm border-0 shadow-xl rounded-2xl">
-      <CardHeader className="p-3">
-        <CardTitle className="text-lg font-semibold text-gray-800 dark:text-gray-100">{title}</CardTitle>
+    <Card className={`w-full bg-slate-800/80 backdrop-blur-sm border border-slate-700 shadow-lg rounded-xl h-[80vh] flex flex-col ${className}`}>
+      <CardHeader className="p-3 flex-none">
+        <CardTitle className="text-lg font-semibold text-slate-200">{title}</CardTitle>
       </CardHeader>
-      <CardContent className="p-3 pt-0">
+      <CardContent className="p-3 pt-0 flex-1 overflow-y-auto">
         <div className="space-y-2">
           {employees.map((employee) => (
             <EmployeeCard

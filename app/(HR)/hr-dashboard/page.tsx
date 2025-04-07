@@ -2,7 +2,7 @@
 import dynamic from 'next/dynamic';
 import { EmployeeList } from "@/components/EmployeeList";
 
-import Sidenav from "@/components/Sidenav";
+// import Sidenav from "../../../components/Sidenav";
 //import { MyChart } from "@/components/Graphs/Piechart";
 const SentimentsPiChart = dynamic(() => import('@/components/Graphs/Sentiments-Piechart'), { ssr: false });
 const ConversationsTinyBar = dynamic(() => import('@/components/Graphs/Conversations-TinyBar'), { ssr: false });
@@ -94,47 +94,57 @@ const HRDashboard = () => {
   
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-slate-900 dark:to-blue-900">
-      <div className="p-4">
+    <div className="min-h-screen bg-gradient-to-b from-slate-900 to-blue-900">
+      <div className="p-4 md:p-6">
         {/* Employee Lists Section */}
         <div className="flex flex-col md:flex-row gap-6 mb-8">
           <div className="w-full md:w-1/2">
             <EmployeeList 
               title="Already Escalated" 
-              employees={highRiskEmployees} 
+              employees={highRiskEmployees}
+              className="bg-slate-800/80 backdrop-blur-sm border border-slate-700 shadow-lg" 
             />
           </div>
           <div className="w-full md:w-1/2">
             <EmployeeList 
               title="Yet to be Escalated" 
-              employees={mediumRiskEmployees} 
+              employees={mediumRiskEmployees}
+              className="bg-slate-800/80 backdrop-blur-sm border border-slate-700 shadow-lg" 
             />
           </div>
         </div>
 
-        {/* Existing Charts Section */}
-        <div className="graphs grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {/* Charts Section */}
+        <div className="graphs grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {chartConfigs.map(({ component, label, className }, idx) => (
             <div
               key={idx}
-              className={`${className} bg-white dark:bg-slate-800/80 backdrop-blur-sm rounded-lg border border-gray-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all duration-300 p-4 cursor-pointer transform hover:scale-[1.02] active:scale-[1.01]`}
+              className={`${className} bg-slate-800/80 backdrop-blur-sm rounded-lg 
+                border border-slate-700 shadow-lg hover:shadow-blue-900/20 
+                transition-all duration-300 p-6 cursor-pointer 
+                transform hover:scale-[1.02] active:scale-[1.01]
+                hover:border-blue-500/30`}
             >
               <div className="w-full h-full flex flex-col">
-                <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">{label}</div>
-                <div className="flex-1 min-h-[200px] h-[250px]">{component}</div>
+                <div className="text-sm font-medium text-slate-300 mb-4">{label}</div>
+                <div className="flex-1 min-h-[200px] h-[250px]">
+                  {component}
+                </div>
               </div>
             </div>
           ))}
         </div>
 
-        {/* <div className="mt-12 bg-white rounded-xl shadow-sm p-6">
-          <div className="text-2xl font-semibold text-gray-800 mb-6">
+        {/* Uncomment and update the DataTable section if needed
+        <div className="mt-12 bg-slate-800/80 backdrop-blur-sm rounded-lg border border-slate-700 shadow-lg p-6">
+          <div className="text-2xl font-semibold text-white mb-6">
             Employee Performance Overview
           </div>
           <div className="w-full overflow-x-auto">
             <DataTableComponent />
           </div>
-        </div> */}
+        </div>
+        */}
       </div>
     </div>
   );
