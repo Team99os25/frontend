@@ -21,27 +21,113 @@ export default MyChart = () => (
 
 "use client"; // Ensures it's only rendered on the client
 
-import { PieChart, Pie, Tooltip, Cell } from 'recharts';
+import { PieChart, Pie, Tooltip, Cell, Legend, ResponsiveContainer } from 'recharts';
 
 const data = [
-  { name: 'Score 1', value: 5, color: '#CDB4DB' },
-  { name: 'Score 2', value: 15, color: '#FFC8DD' },
-  { name: 'Score 3', value: 25, color: '#FFAFCC' },
-  { name: 'Score 4', value: 45, color: '#BDE0FE' },
-  { name: 'Score 5', value: 10, color: '#A2D2FF' },
+  { name: 'Score 1', value: 5 },
+  { name: 'Score 2', value: 15 },
+  { name: 'Score 3', value: 25 },
+  { name: 'Score 4', value: 45 },
+  { name: 'Score 5', value: 10 },
 ];
+
+// ✅ Updated: Modern, harmonious color palette
+const COLORS = ['#D8B4FE', '#F0ABFC', '#A78BFA', '#818CF8', '#7DD3FC'];
 
 const MyChart = () => {
   return (
-    <PieChart width={400} height={200}>
-      <Pie data={data} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={95}>
-      {data.map((entry, index) => (
-          <Cell key={`cell-${index}`} fill={entry.color} />
-        ))}
-      </Pie>
-      <Tooltip />
-    </PieChart>
+    <div className="w-full h-[350px] flex flex-col items-center justify-center">
+      <div className="text-xl font-semibold mb-4">Score Distribution</div>
+      <ResponsiveContainer width="50%" height="80%">
+        <PieChart>
+          <Pie
+            data={data}
+            dataKey="value"
+            nameKey="name"
+            cx="50%"
+            cy="50%"
+            outerRadius={90}
+            innerRadius={40} // ✅ Makes it a donut chart for a modern look
+            paddingAngle={3} // ✅ Adds spacing between slices
+            label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+          >
+            {data.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+            ))}
+          </Pie>
+          <Tooltip />
+          <Legend verticalAlign="bottom" height={36} />
+        </PieChart>
+      </ResponsiveContainer>
+    </div>
   );
 };
 
-export default MyChart; // Use default export
+export default MyChart;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// "use client"; // Ensures it's only rendered on the client
+
+// import { PieChart, Pie, Tooltip, Cell } from 'recharts';
+
+// const data = [
+//   { name: 'Score 1', value: 5, color: '#CDB4DB' },
+//   { name: 'Score 2', value: 15, color: '#FFC8DD' },
+//   { name: 'Score 3', value: 25, color: '#FFAFCC' },
+//   { name: 'Score 4', value: 45, color: '#BDE0FE' },
+//   { name: 'Score 5', value: 10, color: '#A2D2FF' },
+// ];
+
+// const MyChart = () => {
+//   return (
+//     <PieChart width={400} height={200}>
+//       <Pie data={data} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={95}>
+//       {data.map((entry, index) => (
+//           <Cell key={`cell-${index}`} fill={entry.color} />
+//         ))}
+//       </Pie>
+//       <Tooltip />
+//     </PieChart>
+//   );
+// };
+
+// export default MyChart; // Use default export
