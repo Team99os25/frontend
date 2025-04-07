@@ -61,7 +61,7 @@ const HRDashboard = () => {
           >
             <div className="w-full">
               <div className="chart">{component}</div>
-              <div className="chart-text text-center pl-12">{label}</div>
+              <div className="chart-text text-center pl-2">{label}</div>
             </div>
           </div>
         ))}
