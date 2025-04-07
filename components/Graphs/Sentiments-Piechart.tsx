@@ -1,26 +1,4 @@
-/* "use client"
-
-import { PieChart, Pie, Tooltip } from 'recharts';
-
-interface DataType {
-  name: string;
-  value: number;
-}
-
-const data: DataType[] = [
-  { name: 'A', value: 40 },
-  { name: 'B', value: 60 },
-];
-
-export default MyChart = () => (
-  <PieChart width={400} height={400}>
-    <Pie data={data} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} />
-    <Tooltip />
-  </PieChart>
-); */
-
-
-"use client"; // Ensures it's only rendered on the client
+"use client";
 
 import { PieChart, Pie, Tooltip, Cell, Legend, ResponsiveContainer } from 'recharts';
 
@@ -31,14 +9,46 @@ const data = [
   { name: 'Score 4', value: 45 },
 ];
 
-// ✅ Updated: Modern, harmonious color palette
-const COLORS = ['#D8B4FE', '#F0ABFC', '#A78BFA', '#818CF8', '#7DD3FC'];
+const COLORS = ['#fecaca', '#fca5a5', '#f87171', '#ef4444'];
+
+const CustomTooltip = ({ active, payload }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-white/90 backdrop-blur-sm border border-gray-200 rounded-lg shadow-lg p-3">
+        <p className="text-sm font-medium text-gray-600">{payload[0].name}</p>
+        <p className="text-sm font-semibold text-red-600">
+          {`${payload[0].value}%`}
+        </p>
+      </div>
+    );
+  }
+  return null;
+};
+
+const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index }: any) => {
+  const RADIAN = Math.PI / 180;
+  const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+  const x = cx + radius * Math.cos(-midAngle * RADIAN);
+  const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+  return (
+    <text
+      x={x}
+      y={y}
+      fill="white"
+      textAnchor={x > cx ? 'start' : 'end'}
+      dominantBaseline="central"
+      className="text-xs font-medium"
+    >
+      {`${(percent * 100).toFixed(0)}%`}
+    </text>
+  );
+};
 
 const MyChart = () => {
   return (
-    <div className="w-full h-[350px] flex flex-col items-center justify-center">
-      <div className="text-xl font-semibold mb-4">Sentiments Distribution</div>
-      <ResponsiveContainer width="50%" height="80%">
+    <div className="w-full h-[250px] p-2 rounded-lg overflow-hidden">
+      <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           <Pie
             data={data}
@@ -46,17 +56,28 @@ const MyChart = () => {
             nameKey="name"
             cx="50%"
             cy="50%"
-            outerRadius={90}
-            innerRadius={40} // ✅ Makes it a donut chart for a modern look
-            paddingAngle={3} // ✅ Adds spacing between slices
-            label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+            outerRadius={80}
+            innerRadius={40}
+            paddingAngle={3}
+            labelLine={false}
+            label={renderCustomizedLabel}
           >
             {data.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+              <Cell 
+                key={`cell-${index}`} 
+                fill={COLORS[index % COLORS.length]}
+                className="hover:opacity-80 transition-opacity duration-300"
+              />
             ))}
           </Pie>
-          <Tooltip />
-          <Legend verticalAlign="bottom" height={36} />
+          <Tooltip content={<CustomTooltip />} />
+          <Legend 
+            verticalAlign="bottom" 
+            height={36}
+            formatter={(value: string) => (
+              <span className="text-sm text-gray-600">{value}</span>
+            )}
+          />
         </PieChart>
       </ResponsiveContainer>
     </div>

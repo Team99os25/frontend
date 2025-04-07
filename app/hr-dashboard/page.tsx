@@ -1,5 +1,6 @@
 "use client";
 import dynamic from 'next/dynamic';
+import { EmployeeList } from "@/components/EmployeeList";
 
 import Sidenav from "@/components/Sidenav";
 //import { MyChart } from "@/components/Graphs/Piechart";
@@ -17,6 +18,48 @@ export type SidenavProps = {
 };
 
 const HRDashboard = () => {
+  // Mock data for employee lists
+  const highRiskEmployees = [
+    {
+      employeeId: "EMP001",
+      employeeName: "John Doe",
+      vulnerabilityScore: 8,
+      date: "2024-03-15"
+    },
+    {
+      employeeId: "EMP002",
+      employeeName: "Jane Smith",
+      vulnerabilityScore: 9,
+      date: "2024-03-14"
+    },
+    {
+      employeeId: "EMP003",
+      employeeName: "Mike Johnson",
+      vulnerabilityScore: 7,
+      date: "2024-03-13"
+    }
+  ];
+
+  const mediumRiskEmployees = [
+    {
+      employeeId: "EMP004",
+      employeeName: "Sarah Wilson",
+      vulnerabilityScore: 5,
+      date: "2024-03-15"
+    },
+    {
+      employeeId: "EMP005",
+      employeeName: "David Brown",
+      vulnerabilityScore: 6,
+      date: "2024-03-14"
+    },
+    {
+      employeeId: "EMP006",
+      employeeName: "Emily Davis",
+      vulnerabilityScore: 4,
+      date: "2024-03-13"
+    }
+  ];
 
   const chartConfigs = [
     {
@@ -51,30 +94,47 @@ const HRDashboard = () => {
   
 
   return (
-    <div className="flex flex-col h-full bg-gray-200">
-      {/* <Sidenav elements={["Employee Records", "Payroll Management", "Reports", "Settings", "Logout"]} /> */}
-      <div className="graphs grid grid-cols-3 gap-x-5 gap-y-14 my-28 w-5/6 mx-auto">
-        {chartConfigs.map(({ component, label, className }, idx) => (
-          <div
-            key={idx}
-            className={`${className} rounded-lg border border-gray-300 transform transition-transform duration-200 ease-in-out hover:scale-105 hover:shadow-lg active:scale-105 active:shadow-lg`}
-          >
-            <div className="w-full">
-              <div className="chart">{component}</div>
-              <div className="chart-text text-center pl-2">{label}</div>
-            </div>
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-slate-900 dark:to-blue-900">
+      <div className="p-4">
+        {/* Employee Lists Section */}
+        <div className="flex flex-col md:flex-row gap-6 mb-8">
+          <div className="w-full md:w-1/2">
+            <EmployeeList 
+              title="Already Escalated" 
+              employees={highRiskEmployees} 
+            />
           </div>
-        ))}
-      </div>
-
-
-      <div className="datatable my-10 w-fit mx-auto align-middle">
-        <div className="table-heading text-center text-4xl font-bold">
-          Lorem Ipsum
+          <div className="w-full md:w-1/2">
+            <EmployeeList 
+              title="Yet to be Escalated" 
+              employees={mediumRiskEmployees} 
+            />
+          </div>
         </div>
-        <div className="table">
-          <DataTableComponent />
+
+        {/* Existing Charts Section */}
+        <div className="graphs grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {chartConfigs.map(({ component, label, className }, idx) => (
+            <div
+              key={idx}
+              className={`${className} bg-white dark:bg-slate-800/80 backdrop-blur-sm rounded-lg border border-gray-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all duration-300 p-4 cursor-pointer transform hover:scale-[1.02] active:scale-[1.01]`}
+            >
+              <div className="w-full h-full flex flex-col">
+                <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">{label}</div>
+                <div className="flex-1 min-h-[200px] h-[250px]">{component}</div>
+              </div>
+            </div>
+          ))}
         </div>
+
+        {/* <div className="mt-12 bg-white rounded-xl shadow-sm p-6">
+          <div className="text-2xl font-semibold text-gray-800 mb-6">
+            Employee Performance Overview
+          </div>
+          <div className="w-full overflow-x-auto">
+            <DataTableComponent />
+          </div>
+        </div> */}
       </div>
     </div>
   );

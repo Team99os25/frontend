@@ -1,0 +1,63 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 17, 24, 39;
+    --background-end-rgb: 15, 23, 42;
+  }
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+    to bottom,
+    rgb(var(--background-start-rgb)),
+    rgb(var(--background-end-rgb))
+  );
+  min-height: 100vh;
+}
+
+.dark body {
+  background: linear-gradient(
+    to bottom,
+    #0f172a,
+    #1e3a8a
+  );
+}
+
+/* Dark mode styles for cards */
+.dark .bg-white {
+  background-color: rgba(30, 41, 59, 0.8);
+  border-color: rgba(51, 65, 85, 0.5);
+}
+
+.dark .text-gray-800 {
+  color: rgb(226, 232, 240);
+}
+
+.dark .text-gray-600 {
+  color: rgb(148, 163, 184);
+}
+
+.dark .text-gray-500 {
+  color: rgb(100, 116, 139);
+}
+
+/* Chart customizations for dark mode */
+.dark .recharts-cartesian-grid-horizontal line,
+.dark .recharts-cartesian-grid-vertical line {
+  stroke: rgba(71, 85, 105, 0.3);
+}
+
+.dark .recharts-text {
+  fill: rgb(148, 163, 184);
+} 

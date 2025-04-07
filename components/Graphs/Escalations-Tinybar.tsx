@@ -8,55 +8,108 @@ import {
   XAxis,
   YAxis,
   Label,
-  Cell, // ✅ [NEW] Import Cell for custom coloring
+  Cell,
+  CartesianGrid,
 } from 'recharts';
+import { useEffect, useState } from 'react';
 
 const WeekMap = ["", "Mon", "Tue", "Wed", "Thu", "Fri"];
-let dayOfTheWeek = new Date().getDay();
-if (dayOfTheWeek === 6) {
-  dayOfTheWeek = 5;
-  // ✅ Saturday logic to use Friday
+
+interface ChartData {
+  name: string;
+  value: number;
 }
 
-const data = [
-  { name: WeekMap[(dayOfTheWeek + 1) % 5 || 5], value: 15 },
-  { name: WeekMap[(dayOfTheWeek + 2) % 5 || 5], value: 30 },
-  { name: WeekMap[(dayOfTheWeek + 3) % 5 || 5], value: 20 },
-  { name: WeekMap[(dayOfTheWeek + 4) % 5 || 5], value: 25 },
-  { name: WeekMap[(dayOfTheWeek) % 5 || 5], value: 20 },
-];
-
-// ✅ [NEW] Function to determine bar color based on value
-const getPurpleShade = (value: number): string => {
-  if (value < 15) return "#f3e8ff"; // lightest purple
-  if (value < 20) return "#d8b4fe";
-  if (value < 25) return "#c084fc";
-  if (value < 30) return "#a855f7";
-  return "#9333ea"; // darkest purple
-};
-
 const TinyBarChart = () => {
+  const [chartData, setChartData] = useState<ChartData[]>([]);
+
+  useEffect(() => {
+    const dayOfTheWeek = new Date().getDay();
+    const adjustedDay = dayOfTheWeek === 6 ? 5 : dayOfTheWeek;
+    
+    const data: ChartData[] = [
+      { name: WeekMap[(adjustedDay + 1) % 5 || 5], value: 15 },
+      { name: WeekMap[(adjustedDay + 2) % 5 || 5], value: 30 },
+      { name: WeekMap[(adjustedDay + 3) % 5 || 5], value: 20 },
+      { name: WeekMap[(adjustedDay + 4) % 5 || 5], value: 25 },
+      { name: WeekMap[adjustedDay % 5 || 5], value: 20 },
+    ];
+    
+    setChartData(data);
+  }, []);
+
+  const getPurpleShade = (value: number): string => {
+    if (value < 15) return "#c4b5fd";
+    if (value < 20) return "#a78bfa";
+    if (value < 25) return "#8b5cf6";
+    if (value < 30) return "#7c3aed";
+    return "#6d28d9";
+  };
+
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-white/90 backdrop-blur-sm border border-gray-200 rounded-lg shadow-lg p-3">
+          <p className="text-sm font-medium text-gray-600">{`${label}`}</p>
+          <p className="text-sm font-semibold text-violet-600">
+            {`${payload[0].value} escalations`}
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
-    <div className="w-[400px] h-[250px]">
-      {/* <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={data}>
-          <XAxis dataKey="name">
-            <Label value="Week" offset={-5} position="insideBottom" />
+    <div className="w-full h-[250px] p-2 rounded-lg overflow-hidden">
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart 
+          data={chartData}
+          margin={{ top: 10, right: 30, left: 0, bottom: 20 }}
+        >
+          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+          <XAxis 
+            dataKey="name"
+            stroke="#6b7280"
+            tick={{ fill: '#6b7280', fontSize: 12 }}
+          >
+            <Label 
+              value="Week" 
+              offset={-5} 
+              position="insideBottom"
+              fill="#4b5563"
+              fontSize={12}
+            />
           </XAxis>
-          <YAxis>
-            <Label value="Number of Sessions" angle={-90} dy={75} position="insideLeft" />
+          <YAxis
+            stroke="#6b7280"
+            tick={{ fill: '#6b7280', fontSize: 12 }}
+          >
+            <Label 
+              value="Number of Escalations" 
+              angle={-90} 
+              position="insideLeft"
+              fill="#4b5563"
+              fontSize={12}
+              dy={60}
+            />
           </YAxis>
-
-          {/* ✅ Modified: Dynamic fill color using <Cell /> */}
-          {/* <Bar dataKey="value"> */}
-            {/* {data.map((entry, index) => ( */}
-              {/* <Cell key={`cell-${index}`} fill={getPurpleShade(entry.value)} /> */}
-            {/* ))} */}
-          {/* </Bar> */}
-
-          {/* <Tooltip /> */}
-        {/* </BarChart> */}
-      {/* // </ResponsiveContainer> */} 
+          <Tooltip content={<CustomTooltip />} />
+          <Bar 
+            dataKey="value"
+            radius={[4, 4, 0, 0]}
+            animationDuration={1500}
+          >
+            {chartData.map((entry, index) => (
+              <Cell 
+                key={`cell-${index}`} 
+                fill={getPurpleShade(entry.value)}
+                className="hover:opacity-80 transition-opacity duration-300"
+              />
+            ))}
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
     </div>
   );
 };
