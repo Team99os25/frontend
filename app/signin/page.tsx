@@ -11,9 +11,9 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 
 const validationSchema = Yup.object({
-  employeeId: Yup.string().required("Employee ID is required"),
+  employee_id: Yup.string().required("Employee ID is required"),
   password: Yup.string().min(8, "At least 8 characters").required("Required"),
-  e_role: Yup.string().oneOf(["HR", "Employee"], "Select a valid role").required("Required"),
+  role: Yup.string().oneOf(["hr", "employee"], "Select a valid role").required("Required"),
 }).required();
 type FormData = Yup.InferType<typeof validationSchema>;
 
@@ -22,9 +22,8 @@ const Login = () => {
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
     resolver: yupResolver(validationSchema),
     defaultValues: {
-      employeeId: "",
+      employee_id: "",
       password: "",
-      e_role: "Employee"
     }
   });
 
@@ -38,17 +37,20 @@ const Login = () => {
   const submitData = async (data: FormData) => {
     try {
       const AxiosResponse = await axios.post(
-        "http://localhost:3000/api/user/signin",
+        `${process.env.NEXT_PUBLIC_API_URL}/auth/login`,
         data,
         {
           validateStatus: (status) => {
             return status < 600;
           },
+          withCredentials: true,
         })
-      if (AxiosResponse.data.code == 0) {
+        console.log(AxiosResponse)
+        
+      if (AxiosResponse.status == 200) {
         const userDetails = {
-          employeeId: data.employeeId,
-          role: data.e_role,
+          employee_id: data.employee_id,
+          role: data.role,
         };
         localStorage.setItem('userDetails', JSON.stringify(userDetails));
         
@@ -87,7 +89,7 @@ const Login = () => {
                 Employee ID
               </label>
               <input
-                {...register("employeeId")}
+                {...register("employee_id")}
                 type="text"
                 className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-blue-100 
                   placeholder:text-blue-100/50 focus:outline-none focus:ring-2 focus:ring-blue-400/50 
@@ -95,8 +97,8 @@ const Login = () => {
                 placeholder="Enter your Employee ID"
                 autoComplete="off"
               />
-              {errors.employeeId && (
-                <p className="mt-1 text-sm text-red-400">{errors.employeeId.message}</p>
+              {errors.employee_id && (
+                <p className="mt-1 text-sm text-red-400">{errors.employee_id.message}</p>
               )}
             </div>
 
@@ -105,16 +107,16 @@ const Login = () => {
                 Role
               </label>
               <select
-                {...register("e_role")}
+                {...register("role")}
                 className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-blue-100 
                   focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-transparent 
                   transition-all duration-200"
               >
-                <option value="Employee" className="bg-[#151823]">Employee</option>
-                <option value="HR" className="bg-[#151823]">HR</option>
+                <option value="employee" className="bg-[#151823]">Employee</option>
+                <option value="hr" className="bg-[#151823]">HR</option>
               </select>
-              {errors.e_role && (
-                <p className="mt-1 text-sm text-red-400">{errors.e_role.message}</p>
+              {errors.role && (
+                <p className="mt-1 text-sm text-red-400">{errors.role.message}</p>
               )}
             </div>
 

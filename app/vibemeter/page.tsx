@@ -27,7 +27,7 @@ const Vibemeter = () => {
 
     useEffect(() => {
         const userDetails = localStorage.getItem("userDetails");
-        if (userDetails) {
+        if (!userDetails) {
             router.push("/signin");
             return;
         }
