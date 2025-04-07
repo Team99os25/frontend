@@ -64,7 +64,7 @@ export class LLMCallService {
     constructor() {
         // Initialize LLM with function calling capability
         this.llm = new ChatGoogleGenerativeAI({
-            model: process.env.GOOGLE_GENAI_MODEL || "gemini-2.5-pro-exp-03-25",
+            model: process.env.GOOGLE_GENAI_MODEL || "gemini-2.0-flash",
             temperature: 0.3,
             streaming: false,
             apiKey: process.env.GOOGLE_GENAI_API_KEY,

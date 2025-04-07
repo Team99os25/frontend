@@ -10,13 +10,13 @@ export default function Hero() {
         <div className="text-center md:text-left max-w-2xl">
           <h1 className="text-4xl md:text-6xl font-bold leading-tight">
             Revolutionizing Employee Well-Being with  
-            <span className="text-black border-b-4 border-gray-900"> Vibemeter AI</span>
+            <span className="text-black border-b-4 border-gray-900"> Emolyzer</span>
           </h1>
           <p className="mt-4 text-lg text-gray-700">
             AI-driven insights to track moods, enhance engagement, and build a thriving work culture.
           </p>
           <div className="mt-6 flex justify-center md:justify-start space-x-4">
-            <a href="/demo" className="bg-black text-white hover:bg-gray-800 px-3 py-3 text-lg rounded shadow-md transition-all">
+            <a href="/sessions" className="bg-black text-white hover:bg-gray-800 px-3 py-3 text-lg rounded shadow-md transition-all">
               Try the Demo
             </a>
             <a href="/about" className="border border-black px-3 py-3 text-lg rounded hover:bg-gray-100 transition-all">
