@@ -8,7 +8,7 @@ const Footer = () => {
         
 
         <div className="p-3 text-center text-sm text-gray-500">
-          © {new Date().getFullYear()} Vibemeter AI - All Rights Reserved
+          © {new Date().getFullYear()} Emolyzer - All Rights Reserved
         </div>
       </div>
     </footer>
