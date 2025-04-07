@@ -1,0 +1,28 @@
+* [33m2e4977b[m[33m ([m[1;31morigin/main[m[33m)[m design change of components
+[31m|[m * [33m5ad29d1[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m updated compoennets code
+[31m|[m * [33mb70f8bd[m added sessions, session, vibemeter code
+[31m|[m[31m/[m  
+* [33m045b4bd[m user's side of the site
+* [33m124e722[m employee's side
+* [33mf4d8342[m Change to Gemini 2.0 flash for testing
+[32m|[m * [33m470f4fe[m[33m ([m[1;31morigin/hr-dashboard[m[33m)[m Employee details page with hard-coded values
+[32m|[m * [33mde013e8[m Switching to Cursor
+[32m|[m * [33m281ae2c[m Commited
+[32m|[m * [33m1826d37[m Added trivial page for on click of an employee, yet to be styled
+[32m|[m * [33m1f74183[m Pushed the first code
+[32m|[m[32m/[m  
+[32m|[m * [33m9a62224[m[33m ([m[1;35mrefs/stash[m[33m)[m WIP on main: f8ed709 Complete llm chat
+[32m|[m[32m/[m[35m|[m 
+[32m|[m * [33ma9b8ca3[m index on main: f8ed709 Complete llm chat
+[32m|[m[32m/[m  
+* [33mf8ed709[m Complete llm chat
+* [33m69d4a86[m Add LLM service
+* [33mc3959e1[m added employee id
+* [33m5b3b85d[m sign in and sign up done
+* [33m091729e[m removed useless packages
+* [33mab80936[m added supabase, example in /app/example/supabase
+* [33ma98c907[m updated base code
+* [33m97fff65[m updated readme, added .env.example
+* [33m046c105[m added homeimage to readme
+* [33m31ed7a9[m updated readme
+* [33mea66259[m added frontened structure, cloudinary, mongodb-connections, mail-setup, and homepage
