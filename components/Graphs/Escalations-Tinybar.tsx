@@ -19,10 +19,10 @@ if (dayOfTheWeek === 6) {
 }
 
 const data = [
-  { name: WeekMap[(dayOfTheWeek + 1) % 5 || 5], value: 12 },
+  { name: WeekMap[(dayOfTheWeek + 1) % 5 || 5], value: 15 },
   { name: WeekMap[(dayOfTheWeek + 2) % 5 || 5], value: 30 },
   { name: WeekMap[(dayOfTheWeek + 3) % 5 || 5], value: 20 },
-  { name: WeekMap[(dayOfTheWeek + 4) % 5 || 5], value: 20 },
+  { name: WeekMap[(dayOfTheWeek + 4) % 5 || 5], value: 25 },
   { name: WeekMap[(dayOfTheWeek) % 5 || 5], value: 20 },
 ];
 
@@ -38,7 +38,7 @@ const getPurpleShade = (value: number): string => {
 const TinyBarChart = () => {
   return (
     <div className="w-[400px] h-[250px]">
-      <ResponsiveContainer width="100%" height="100%">
+      {/* <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data}>
           <XAxis dataKey="name">
             <Label value="Week" offset={-5} position="insideBottom" />
@@ -48,15 +48,15 @@ const TinyBarChart = () => {
           </YAxis>
 
           {/* ✅ Modified: Dynamic fill color using <Cell /> */}
-          <Bar dataKey="value">
-            {data.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={getPurpleShade(entry.value)} />
-            ))}
-          </Bar>
+          {/* <Bar dataKey="value"> */}
+            {/* {data.map((entry, index) => ( */}
+              {/* <Cell key={`cell-${index}`} fill={getPurpleShade(entry.value)} /> */}
+            {/* ))} */}
+          {/* </Bar> */}
 
-          <Tooltip />
-        </BarChart>
-      </ResponsiveContainer>
+          {/* <Tooltip /> */}
+        {/* </BarChart> */}
+      {/* // </ResponsiveContainer> */} */}
     </div>
   );
 };

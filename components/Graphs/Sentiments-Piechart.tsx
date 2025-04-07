@@ -19,6 +19,7 @@ export default MyChart = () => (
   </PieChart>
 ); */
 
+
 "use client"; // Ensures it's only rendered on the client
 
 import { PieChart, Pie, Tooltip, Cell, Legend, ResponsiveContainer } from 'recharts';
@@ -28,7 +29,6 @@ const data = [
   { name: 'Score 2', value: 15 },
   { name: 'Score 3', value: 25 },
   { name: 'Score 4', value: 45 },
-  { name: 'Score 5', value: 10 },
 ];
 
 // ✅ Updated: Modern, harmonious color palette
@@ -37,7 +37,7 @@ const COLORS = ['#D8B4FE', '#F0ABFC', '#A78BFA', '#818CF8', '#7DD3FC'];
 const MyChart = () => {
   return (
     <div className="w-full h-[350px] flex flex-col items-center justify-center">
-      <div className="text-xl font-semibold mb-4">Score Distribution</div>
+      <div className="text-xl font-semibold mb-4">Sentiments Distribution</div>
       <ResponsiveContainer width="50%" height="80%">
         <PieChart>
           <Pie
