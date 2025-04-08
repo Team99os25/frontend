@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Hero() {
   return (
@@ -16,12 +17,16 @@ export default function Hero() {
             AI-driven insights to track moods, enhance engagement, and build a thriving work culture.
           </p>
           <div className="mt-6 flex justify-center md:justify-start space-x-4">
-            <a href="/vibemeter" className="bg-black text-white hover:bg-gray-800 px-3 py-3 text-lg rounded shadow-md transition-all">
+            <Link href="/vibemeter" passHref>
+              <a className="bg-black text-white hover:bg-gray-800 px-3 py-3 text-lg rounded shadow-md transition-all">
               Try the Demo
-            </a>
-            <a href="/about" className="border border-black px-3 py-3 text-lg rounded hover:bg-gray-100 transition-all">
+              </a>
+            </Link>
+            <Link href="/about" passHref>
+              <a className="border border-black px-3 py-3 text-lg rounded hover:bg-gray-100 transition-all">
               Learn More
-            </a>
+              </a>
+            </Link>
           </div>
         </div>
         
