@@ -203,7 +203,7 @@ const Vibemeter = () => {
 
 
 
-                {vibeMeterStatus ? (
+                { vibeMeterStatus ? (
                     <div className="fixed inset-0 md:left-64 bg-[#1e2337]/50 backdrop-blur-sm z-[40] flex items-center justify-center">
                         <div className="bg-[#2b3558]/90 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl w-full max-w-xl mx-4 animate-fadeIn">
                             <div className="p-4 md:p-6 border-b border-white/20">
