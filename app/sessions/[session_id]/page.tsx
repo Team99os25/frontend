@@ -33,8 +33,6 @@ const ChatIcon = () => (
     </svg>
 );
 
-
-
 export default function SessionPage() {
     const params = useParams();
     const session_id = params?.session_id as string;
@@ -50,6 +48,30 @@ export default function SessionPage() {
     const [isSending, setIsSending] = useState(false);
     const chatEndRef = useRef<HTMLDivElement>(null);
 
+
+    const fetchSummary = async (session_id: string) => {
+        try {
+            setLoading(true);
+            const response = await axios.post(
+                `${process.env.NEXT_PUBLIC_API_URL}/summary/${session_id}`,
+                {},
+                {
+                    validateStatus: (status) => status < 600,
+                    withCredentials: true,
+                }
+            );
+
+            if (response.status >= 200 && response.status < 300) {
+                console.log("Summary generated successfully:", response.data);
+            } else {
+                throw new Error(response.data?.message || 'Failed to generate summary');
+            }
+        } catch (err) {
+            console.error("Error generating summary:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
 
     useEffect(() => {
@@ -117,11 +139,12 @@ export default function SessionPage() {
 
         fetchSession();
 
-        // Cleanup function
+
+
         return () => {
             abortController.abort();
         };
-    }, [session_id]);  // Add session_id as dependency
+    }, [session_id]);
 
     const handleSendMessage = async () => {
         if (!newMessage.trim()) return;
@@ -150,6 +173,10 @@ export default function SessionPage() {
 
             if (status === "completed") {
                 setConversationCompleted(true);
+                // generatre summary
+                if (session_id) {
+                    fetchSummary(session_id)
+                }
             }
 
             const addMessage = (message: typeof user_message) => {
@@ -207,7 +234,7 @@ export default function SessionPage() {
     );
 
     return (
-        <div className="flex h-screen bg-gray-50 pt-20 min-h-screen">
+        <div className="flex h-screen bg-gray-50  min-h-screen">
 
             {/* left side */}
             <div className="w-64 bg-white border-r border-gray-200 flex flex-col">
