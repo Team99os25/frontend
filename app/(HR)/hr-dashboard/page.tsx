@@ -104,11 +104,6 @@ const HRDashboard = () => {
   ];
 
   useEffect(() => {
-    // axios.post("http://localhost:8000/auth/login", {
-    //   "employee_id": "EMP1111",
-    //   "password": "OPENSOFT",
-    //   "role": "hr"
-    // },{withCredentials:true}).then((res) => {
       axios.get("http://localhost:8000/hr/escalated-chats", {withCredentials:true})
         .then((res) => {
           var highRiskEmploye: Employee[] = [];
