@@ -55,7 +55,8 @@ const Login = () => {
         localStorage.setItem('userDetails', JSON.stringify(userDetails));
         
         toast.success(AxiosResponse.data.message);
-        router.push('/vibemeter');
+        if(userDetails.role=="employee") router.push('/vibemeter');
+        else router.push("/hr-dashboard")
       }
       else {
         toast.error(AxiosResponse.data.message);
