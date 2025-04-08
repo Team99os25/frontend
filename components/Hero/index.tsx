@@ -18,14 +18,10 @@ export default function Hero() {
           </p>
           <div className="mt-6 flex justify-center md:justify-start space-x-4">
             <Link href="/vibemeter" passHref>
-              <a className="bg-black text-white hover:bg-gray-800 px-3 py-3 text-lg rounded shadow-md transition-all">
-              Try the Demo
-              </a>
+            Try the Demo
             </Link>
             <Link href="/about" passHref>
-              <a className="border border-black px-3 py-3 text-lg rounded hover:bg-gray-100 transition-all">
-              Learn More
-              </a>
+            Learn More
             </Link>
           </div>
         </div>
