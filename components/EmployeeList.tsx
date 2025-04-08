@@ -22,12 +22,16 @@ export function EmployeeList({ title, employees, className }: EmployeeListProps)
       </CardHeader>
       <CardContent className="p-3 pt-0 flex-1 overflow-y-auto">
         <div className="space-y-2">
-          {employees.map((employee) => (
-            <EmployeeCard
-              key={employee.employeeId}
-              {...employee}
-            />
-          ))}
+          {employees.length === 0 ? (
+            <div className="text-slate-400 text-center py-8">No person yet</div>
+          ) : (
+            employees.map((employee) => (
+              <EmployeeCard
+                key={employee.employeeId}
+                {...employee}
+              />
+            ))
+          )}
         </div>
       </CardContent>
     </Card>

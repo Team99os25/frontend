@@ -1,6 +1,8 @@
 "use client";
 import dynamic from 'next/dynamic';
 import { EmployeeList } from "@/components/EmployeeList";
+import { useEffect, useState } from 'react';
+import axios from 'axios';
 
 // import Sidenav from "../../../components/Sidenav";
 //import { MyChart } from "@/components/Graphs/Piechart";
@@ -10,35 +12,44 @@ const EscalationsTinyBar = dynamic(() => import('@/components/Graphs/Escalations
 const WorkhoursAreaChart = dynamic(() => import('@/components/Graphs/Workhours-Areachart'), { ssr: false });
 const LeavesSimpleLine = dynamic(() => import('@/components/Graphs/Leaves-SimpleLine'), { ssr: false });
 const PerformanceSimpleLine = dynamic(() => import('@/components/Graphs/Performance-SimpleLine'), { ssr: false });
-const DataTableComponent = dynamic(() => import('@/components/Table/Table'), {  ssr: false });
+const DataTableComponent = dynamic(() => import('@/components/Table/Table'), { ssr: false });
 
 
 export type SidenavProps = {
   elements: string[];
 };
 
+interface Employee {
+  employeeId: string;
+  employeeName: string;
+  vulnerabilityScore: number;
+  date: string;
+}
+
 const HRDashboard = () => {
   // Mock data for employee lists
-  const highRiskEmployees = [
-    {
-      employeeId: "EMP001",
-      employeeName: "John Doe",
-      vulnerabilityScore: 8,
-      date: "2024-03-15"
-    },
-    {
-      employeeId: "EMP002",
-      employeeName: "Jane Smith",
-      vulnerabilityScore: 9,
-      date: "2024-03-14"
-    },
-    {
-      employeeId: "EMP003",
-      employeeName: "Mike Johnson",
-      vulnerabilityScore: 7,
-      date: "2024-03-13"
-    }
-  ];
+  const [highRiskEmployees, setHighRiskEmployees] = useState<Employee[]>([])
+  const [notEsclated, setNotEscalated] = useState<Employee[]>([])
+  // const highRiskEmployees = [
+  //   {
+  //     employeeId: "EMP001",
+  //     employeeName: "John Doe",
+  //     vulnerabilityScore: 8,
+  //     date: "2024-03-15"
+  //   },
+  //   {
+  //     employeeId: "EMP002",
+  //     employeeName: "Jane Smith",
+  //     vulnerabilityScore: 9,
+  //     date: "2024-03-14"
+  //   },
+  //   {
+  //     employeeId: "EMP003",
+  //     employeeName: "Mike Johnson",
+  //     vulnerabilityScore: 7,
+  //     date: "2024-03-13"
+  //   }
+  // ];
 
   const mediumRiskEmployees = [
     {
@@ -91,7 +102,47 @@ const HRDashboard = () => {
       // className: "chart-6",
     },
   ];
-  
+
+  useEffect(() => {
+    // axios.post("http://localhost:8000/auth/login", {
+    //   "employee_id": "EMP1111",
+    //   "password": "OPENSOFT",
+    //   "role": "hr"
+    // },{withCredentials:true}).then((res) => {
+      axios.get("http://localhost:8000/hr/escalated-chats", {withCredentials:true})
+        .then((res) => {
+          var highRiskEmploye: Employee[] = [];
+          res.data.forEach(dat => {
+                highRiskEmploye.push({
+                  employeeId: dat.emp_id,
+                  employeeName: dat.emp_name,
+                  vulnerabilityScore: dat.vulnerability_score,
+                  date: new Date(dat.last_session_date).toLocaleDateString('en-GB')
+                })
+          })
+          setHighRiskEmployees(highRiskEmploye)
+        })
+
+        axios.get("http://localhost:8000/hr/intervention-sessions", {withCredentials:true})
+        .then((res) => {
+          var notEsclated: Employee[] = [];
+          res.data.forEach(dat => {
+            notEsclated.push({
+                  employeeId: dat.emp_id,
+                  employeeName: dat.emp_name,
+                  vulnerabilityScore: dat.vulnerability_score,
+                  date: new Date(dat.started_at).toLocaleDateString('en-GB')
+                })
+          })
+          setNotEscalated(notEsclated)
+        })
+        .catch((err) => {
+          console.error('Error:', err.response?.data || err.message);
+        });
+   
+
+  }, [])
+
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 to-blue-900">
@@ -99,17 +150,17 @@ const HRDashboard = () => {
         {/* Employee Lists Section */}
         <div className="flex flex-col md:flex-row gap-6 mb-8">
           <div className="w-full md:w-1/2">
-            <EmployeeList 
-              title="Already Escalated" 
+            <EmployeeList
+              title="Escalated"
               employees={highRiskEmployees}
-              className="bg-slate-800/80 backdrop-blur-sm border border-slate-700 shadow-lg" 
+              className="bg-slate-800/80 backdrop-blur-sm border border-slate-700 shadow-lg"
             />
           </div>
           <div className="w-full md:w-1/2">
-            <EmployeeList 
-              title="Yet to be Escalated" 
-              employees={mediumRiskEmployees}
-              className="bg-slate-800/80 backdrop-blur-sm border border-slate-700 shadow-lg" 
+            <EmployeeList
+              title="Not Escalated"
+              employees={notEsclated}
+              className="bg-slate-800/80 backdrop-blur-sm border border-slate-700 shadow-lg"
             />
           </div>
         </div>

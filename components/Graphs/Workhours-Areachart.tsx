@@ -1,5 +1,7 @@
 "use client";
 
+import axios from 'axios';
+import { useEffect } from 'react';
 import { AreaChart, Area, Tooltip, ResponsiveContainer, XAxis, YAxis, Label, CartesianGrid } from 'recharts';
 
 const data = [
@@ -27,6 +29,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 const AreaChartComponent = () => {
+  
   return (
     <div className="w-full h-[250px] p-2 rounded-lg overflow-hidden">
       <ResponsiveContainer width="100%" height="100%">

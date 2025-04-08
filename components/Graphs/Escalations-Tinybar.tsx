@@ -12,31 +12,51 @@ import {
   CartesianGrid,
 } from 'recharts';
 import { useEffect, useState } from 'react';
-
-const WeekMap = ["", "Mon", "Tue", "Wed", "Thu", "Fri"];
+import axios from 'axios';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface ChartData {
   name: string;
   value: number;
 }
 
+const months = [
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+];
+
 const TinyBarChart = () => {
   const [chartData, setChartData] = useState<ChartData[]>([]);
+  const [selectedYear, setSelectedYear] = useState<string>(new Date().getFullYear().toString());
+
+  const years = Array.from({ length: 5 }, (_, i) => {
+    const year = new Date().getFullYear() - i;
+    return { value: year.toString(), label: year.toString() };
+  });
 
   useEffect(() => {
-    const dayOfTheWeek = new Date().getDay();
-    const adjustedDay = dayOfTheWeek === 6 ? 5 : dayOfTheWeek;
-    
-    const data: ChartData[] = [
-      { name: WeekMap[(adjustedDay + 1) % 5 || 5], value: 15 },
-      { name: WeekMap[(adjustedDay + 2) % 5 || 5], value: 30 },
-      { name: WeekMap[(adjustedDay + 3) % 5 || 5], value: 20 },
-      { name: WeekMap[(adjustedDay + 4) % 5 || 5], value: 25 },
-      { name: WeekMap[adjustedDay % 5 || 5], value: 20 },
-    ];
-    
-    setChartData(data);
-  }, []);
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:8000/hr/sessions/yearly-escalations?year=${selectedYear}`,
+          { withCredentials: true }
+        );
+        
+        const monthlyCount = response.data.monthly_counts;
+        // Convert object to array format that chart expects
+        const formattedData = Object.entries(monthlyCount).map(([month, count]) => ({
+          name: months[parseInt(month)],
+          value: count as number
+        })).sort((a, b) => months.indexOf(a.name) - months.indexOf(b.name));
+        
+        setChartData(formattedData);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchData();
+  }, [selectedYear]);
 
   const getPurpleShade = (value: number): string => {
     if (value < 15) return "#c4b5fd";
@@ -61,55 +81,83 @@ const TinyBarChart = () => {
   };
 
   return (
-    <div className="w-full h-[250px] p-2 rounded-lg overflow-hidden">
-      <ResponsiveContainer width="100%" height="100%">
-        <BarChart 
-          data={chartData}
-          margin={{ top: 10, right: 30, left: 0, bottom: 20 }}
-        >
-          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
-          <XAxis 
-            dataKey="name"
-            stroke="#6b7280"
-            tick={{ fill: '#6b7280', fontSize: 12 }}
-          >
-            <Label 
-              value="Week" 
-              offset={-5} 
-              position="insideBottom"
-              fill="#4b5563"
-              fontSize={12}
-            />
-          </XAxis>
-          <YAxis
-            stroke="#6b7280"
-            tick={{ fill: '#6b7280', fontSize: 12 }}
-          >
-            <Label 
-              value="Number of Escalations" 
-              angle={-90} 
-              position="insideLeft"
-              fill="#4b5563"
-              fontSize={12}
-              dy={60}
-            />
-          </YAxis>
-          <Tooltip content={<CustomTooltip />} />
-          <Bar 
-            dataKey="value"
-            radius={[4, 4, 0, 0]}
-            animationDuration={1500}
-          >
-            {chartData.map((entry, index) => (
-              <Cell 
-                key={`cell-${index}`} 
-                fill={getPurpleShade(entry.value)}
-                className="hover:opacity-80 transition-opacity duration-300"
-              />
-            ))}
-          </Bar>
-        </BarChart>
-      </ResponsiveContainer>
+    <div className="w-full h-full p-4 rounded-lg bg-slate-800/80">
+      <div className="flex flex-col items-center justify-between mb-4">
+        <div className="flex gap-2">
+          <Select value={selectedYear} onValueChange={setSelectedYear}>
+            <SelectTrigger className="w-[100px] bg-slate-700 border-slate-600 text-slate-200">
+              <SelectValue placeholder="Select year" />
+            </SelectTrigger>
+            <SelectContent className="bg-slate-800 border-slate-700">
+              {years.map((year) => (
+                <SelectItem 
+                  key={year.value} 
+                  value={year.value}
+                  className="text-slate-200 hover:bg-slate-700 focus:bg-slate-700 focus:text-slate-200"
+                >
+                  {year.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      <div className="w-full h-[250px]">
+        {chartData.length > 0 ? (
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart 
+              data={chartData}
+              margin={{ top: 10, right: 10, left: 10, bottom: 20 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke="#475569" vertical={false} />
+              <XAxis 
+                dataKey="name"
+                stroke="#94a3b8"
+                tick={{ fill: '#94a3b8', fontSize: 12 }}
+              >
+                <Label 
+                  value="Months" 
+                  offset={-5} 
+                  position="insideBottom"
+                  fill="#94a3b8"
+                  fontSize={12}
+                />
+              </XAxis>
+              <YAxis
+                stroke="#94a3b8"
+                tick={{ fill: '#94a3b8', fontSize: 12 }}
+              >
+                <Label 
+                  value="Escalations" 
+                  angle={-90} 
+                  position="insideLeft"
+                  fill="#94a3b8"
+                  fontSize={12}
+                  dy={60}
+                />
+              </YAxis>
+              <Tooltip content={<CustomTooltip />} />
+              <Bar 
+                dataKey="value"
+                radius={[4, 4, 0, 0]}
+                animationDuration={1500}
+              >
+                {chartData.map((entry, index) => (
+                  <Cell 
+                    key={`cell-${index}`} 
+                    fill={getPurpleShade(entry.value)}
+                    className="hover:opacity-80 transition-opacity duration-300"
+                  />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-slate-400">
+            No data available for selected year
+          </div>
+        )}
+      </div>
     </div>
   );
 };
