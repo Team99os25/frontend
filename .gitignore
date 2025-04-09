@@ -5,7 +5,6 @@
 .vscode
 # testing
 /coverage
-.env
 
 /public/videos/home
 
