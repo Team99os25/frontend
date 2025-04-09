@@ -51,9 +51,6 @@ const CircularProgress = ({ value }: { value: number }) => {
     const radius = 50;
     const circumference = 2 * Math.PI * radius;
     const strokeDashoffset = circumference - (value / 10) * circumference;
-    const radius = 50;
-    const circumference = 2 * Math.PI * radius;
-    const strokeDashoffset = circumference - (value / 10) * circumference;
 
     return (
         <div className="relative w-32 h-32">
@@ -84,8 +81,6 @@ const CircularProgress = ({ value }: { value: number }) => {
                 <span className="text-2xl font-bold text-white">{value}</span>
             </div>
         </div>
-    );
-};
     );
 };
 
@@ -282,8 +277,6 @@ const Page = ({ params }: { params: Promise<{ employeeId: string }> }) => {
                 </Dialog>
             </div>
         </div>
-    );
-};
     );
 };
 

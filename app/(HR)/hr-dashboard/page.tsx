@@ -31,26 +31,6 @@ const HRDashboard = () => {
   // Mock data for employee lists
   const [highRiskEmployees, setHighRiskEmployees] = useState<Employee[]>([])
   const [notEsclated, setNotEscalated] = useState<Employee[]>([])
-  // const highRiskEmployees = [
-  //   {
-  //     employeeId: "EMP001",
-  //     employeeName: "John Doe",
-  //     vulnerabilityScore: 8,
-  //     date: "2024-03-15"
-  //   },
-  //   {
-  //     employeeId: "EMP002",
-  //     employeeName: "Jane Smith",
-  //     vulnerabilityScore: 9,
-  //     date: "2024-03-14"
-  //   },
-  //   {
-  //     employeeId: "EMP003",
-  //     employeeName: "Mike Johnson",
-  //     vulnerabilityScore: 7,
-  //     date: "2024-03-13"
-  //   }
-  // ];
   const router = useRouter();
 
   useEffect(() => {
@@ -71,26 +51,6 @@ const HRDashboard = () => {
     }
   }, [router]);
   
-  const mediumRiskEmployees = [
-    {
-      employeeId: "EMP004",
-      employeeName: "Sarah Wilson",
-      vulnerabilityScore: 5,
-      date: "2024-03-15"
-    },
-    {
-      employeeId: "EMP005",
-      employeeName: "David Brown",
-      vulnerabilityScore: 6,
-      date: "2024-03-14"
-    },
-    {
-      employeeId: "EMP006",
-      employeeName: "Emily Davis",
-      vulnerabilityScore: 4,
-      date: "2024-03-13"
-    }
-  ];
 
   const chartConfigs = [
     {

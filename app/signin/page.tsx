@@ -53,8 +53,8 @@ const Login = () => {
           role: data.role,
         };
         localStorage.setItem('userDetails', JSON.stringify(userDetails));
+        toast.success(AxiosResponse.data.message);
         if(data.role == "employee") {
-          toast.success(AxiosResponse.data.message);
           router.push('/vibemeter');
         }
         else {
