@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 
 const validationSchema = Yup.object({
   employee_id: Yup.string().required("Employee ID is required"),
-  password: Yup.string().min(8, "At least 8 characters").required("Required"),
+  password: Yup.string().required("Required"),
   role: Yup.string().oneOf(["hr", "employee"], "Select a valid role").required("Required"),
 }).required();
 type FormData = Yup.InferType<typeof validationSchema>;
@@ -53,12 +53,16 @@ const Login = () => {
           role: data.role,
         };
         localStorage.setItem('userDetails', JSON.stringify(userDetails));
-        
-        toast.success(AxiosResponse.data.message);
-        router.push('/vibemeter');
+        if(data.role == "employee") {
+          toast.success(AxiosResponse.data.message);
+          router.push('/vibemeter');
+        }
+        else {
+          router.push('/hr-dashboard');
+        }
       }
       else {
-        toast.error(AxiosResponse.data.message);
+        toast.error(AxiosResponse.data.detail);
       }
     } catch (error) {
       console.log(error)
@@ -138,14 +142,16 @@ const Login = () => {
               )}
             </div>
 
-            <Button
-              type="submit"
-              className="w-full h-12 bg-gradient-to-r from-blue-500 to-blue-400 text-white text-lg
-                hover:from-blue-600 hover:to-blue-500 transition-all duration-300 rounded-lg
-                hover:scale-[1.02] hover:shadow-lg hover:shadow-blue-500/25"
-            >
-              Sign In
-            </Button>
+            <div className="flex justify-center">
+              <Button
+                type="submit"
+                className="px-8 h-12 bg-gradient-to-r from-blue-500 to-blue-400 text-white text-lg
+                  hover:from-blue-600 hover:to-blue-500 transition-all duration-300 rounded-xl
+                  hover:scale-[1.02] hover:shadow-lg hover:shadow-blue-500/25"
+              >
+                Sign In
+              </Button>
+            </div>
           </div>
         </form>
       </div>
