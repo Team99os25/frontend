@@ -14,7 +14,7 @@ RUN npm install --legacy-peer-deps
 COPY . .
 
 # Build the app (if needed for production)
-RUN npm run build
+# RUN npm run build
 
 # Expose the port (adjust as needed based on your frontend framework)
 EXPOSE 3000
