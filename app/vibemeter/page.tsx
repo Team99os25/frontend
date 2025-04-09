@@ -47,26 +47,13 @@ const Vibemeter = () => {
     useEffect(() => {
         const fetchSession = async () => {
             try {
-                const [allSessionsResponse] = await Promise.all([
-                    axios.get(
-                        `${process.env.NEXT_PUBLIC_API_URL}/sessions/employee/`,
-                        {
-                            validateStatus: (status) => status < 600,
-                            withCredentials: true,
-                        },
-                    ),
-                ]);
-
-                const todayVibemeterStatus = axios.get(
-                    `${process.env.NEXT_PUBLIC_API_URL}/vibemeter/check`,
+                const allSessionsResponse = await axios.get(
+                    `${process.env.NEXT_PUBLIC_API_URL}/sessions/employee/`,
                     {
                         validateStatus: (status) => status < 600,
                         withCredentials: true,
                     },
-                );
-
-                const { data } = await todayVibemeterStatus;
-                setVibeMeterStatus(data.should_submit);
+                )
 
                 console.log("sessionResponse:", allSessionsResponse.data);
                 setAllSessions(allSessionsResponse.data);
@@ -74,6 +61,23 @@ const Vibemeter = () => {
                 console.error("Failed to load session:", err);
             }
         };
+        const fetchvibemeter = async () => {
+            try{
+                const todayVibemeterStatus = axios.get(
+                    `${process.env.NEXT_PUBLIC_API_URL}/vibemeter/check`,
+                    {
+                        validateStatus: (status) => status < 600,
+                        withCredentials: true,
+                    },
+                );
+    
+                const { data } = await todayVibemeterStatus;
+                setVibeMeterStatus(data.should_submit);
+            }   catch (err) {
+                console.error("Failed to load vibemeter:", err);
+            }
+        }
+        fetchvibemeter();
         fetchSession();
     }, []);
 
