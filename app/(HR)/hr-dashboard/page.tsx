@@ -3,6 +3,7 @@ import dynamic from 'next/dynamic';
 import { EmployeeList } from "@/components/EmployeeList";
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import { useRouter } from 'next/navigation';
 
 // import Sidenav from "../../../components/Sidenav";
 //import { MyChart } from "@/components/Graphs/Piechart";
@@ -50,7 +51,26 @@ const HRDashboard = () => {
   //     date: "2024-03-13"
   //   }
   // ];
+  const router = useRouter();
 
+  useEffect(() => {
+    const userDetails = localStorage.getItem('userDetails');
+
+    if (!userDetails) {
+      router.push('/signin');
+      return;
+    }
+
+    try {
+      const userDetailsObject = JSON.parse(userDetails);
+      if (!userDetailsObject || typeof userDetailsObject !== 'object') {
+        router.push('/signin');
+      }
+    } catch (error) {
+      router.push('/signin');
+    }
+  }, [router]);
+  
   const mediumRiskEmployees = [
     {
       employeeId: "EMP004",

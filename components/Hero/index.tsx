@@ -16,12 +16,12 @@ export default function Hero() {
           <p className="mt-4 text-lg text-gray-700">
             AI-driven insights to track moods, enhance engagement, and build a thriving work culture.
           </p>
-          <div className="mt-6 flex justify-center md:justify-start space-x-4">
-            <Link href="/vibemeter" passHref>
-            Try the Demo
-            </Link>
-            <Link href="/about" passHref>
-            Learn More
+          <div className="mt-6 flex justify-center md:justify-start">
+            <Link 
+              href="/signin" 
+              className="rounded-xl bg-indigo-600 px-6 py-3 text-base font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-all duration-300"
+            >
+              Sign In
             </Link>
           </div>
         </div>

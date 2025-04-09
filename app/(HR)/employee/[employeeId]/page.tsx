@@ -51,6 +51,9 @@ const CircularProgress = ({ value }: { value: number }) => {
     const radius = 50;
     const circumference = 2 * Math.PI * radius;
     const strokeDashoffset = circumference - (value / 10) * circumference;
+    const radius = 50;
+    const circumference = 2 * Math.PI * radius;
+    const strokeDashoffset = circumference - (value / 10) * circumference;
 
     return (
         <div className="relative w-32 h-32">
@@ -83,9 +86,13 @@ const CircularProgress = ({ value }: { value: number }) => {
         </div>
     );
 };
+    );
+};
 
 // Session Card Component
-const SessionCard = ({ session, onClick }: { session: Session; onClick: () => void }) => {
+const SessionCard = (
+    { session, onClick }: { session: Session; onClick: () => void },
+) => {
     return (
         <Card
             className="p-4 cursor-pointer hover:shadow-lg transition-shadow bg-slate-800 border-slate-700 hover:bg-slate-700"
@@ -96,11 +103,11 @@ const SessionCard = ({ session, onClick }: { session: Session; onClick: () => vo
                 {session.summary}
             </p>
             <p className="text-xs text-slate-400 mt-2">
-                {format(new Date(session.date), 'MMM d, yyyy')}
+                {format(new Date(session.date), "MMM d, yyyy")}
             </p>
         </Card>
-    )
-}
+    );
+};
 
 const Page = ({ params }: { params: Promise<{ employeeId: string }> }) => {
     const resolvedParams = use(params);
@@ -120,6 +127,7 @@ const Page = ({ params }: { params: Promise<{ employeeId: string }> }) => {
             } catch (error) {
                 console.error('Error fetching employee data:', error);
             } finally {
+                setLoading(false);
                 setLoading(false);
             }
         };
@@ -243,12 +251,18 @@ const Page = ({ params }: { params: Promise<{ employeeId: string }> }) => {
                     {selectedSession && (
                         <DialogContent className="max-w-2xl bg-slate-800 border-slate-700 text-white">
                             <DialogHeader>
-                                <DialogTitle className="text-white">{selectedSession.title}</DialogTitle>
+                                <DialogTitle className="text-white">
+                                    {selectedSession.title}
+                                </DialogTitle>
                             </DialogHeader>
                             <div className="mt-4">
-                                <p className="text-slate-300 mb-4">{selectedSession.summary}</p>
+                                <p className="text-slate-300 mb-4">
+                                    {selectedSession.summary}
+                                </p>
                                 <div className="space-y-2">
-                                    <h4 className="font-semibold text-white">Reasons for Escalation:</h4>
+                                    <h4 className="font-semibold text-white">
+                                        Reasons for Escalation:
+                                    </h4>
                                     <ul className="list-disc list-inside space-y-1">
                                         {selectedSession.reasons.map((reason, index) => (
                                             <li key={index} className="text-slate-300">{reason}</li>
@@ -256,7 +270,11 @@ const Page = ({ params }: { params: Promise<{ employeeId: string }> }) => {
                                     </ul>
                                 </div>
                                 <p className="text-sm text-slate-400 mt-4">
-                                    Session Date: {format(new Date(selectedSession.date), 'MMMM d, yyyy')}
+                                    Session Date:{" "}
+                                    {format(
+                                        new Date(selectedSession.date),
+                                        "MMMM d, yyyy",
+                                    )}
                                 </p>
                             </div>
                         </DialogContent>
@@ -266,5 +284,7 @@ const Page = ({ params }: { params: Promise<{ employeeId: string }> }) => {
         </div>
     );
 };
+    );
+};
 
-export default Page
+export default Page;
