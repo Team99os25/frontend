@@ -59,7 +59,7 @@ export default function Sessions() {
                     className="inline-flex items-center justify-center px-10 py-4 text-xl font-semibold text-white bg-gradient-to-r from-blue-500 to-teal-400 rounded-full shadow-lg hover:bg-gradient-to-r hover:from-blue-600 hover:to-teal-500 focus:outline-none focus:ring-4 focus:ring-blue-500 transition-all duration-300 transform "
                 >
                     <span className="mr-3">🔮</span>
-                    <span>Explore Today's Session</span>
+                    <span>Explore Today&apos;s Session</span>
                 </a>
             </div>
 

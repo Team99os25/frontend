@@ -21,7 +21,7 @@ const NoIntervention: React.FC = () => {
 
                 <div className="space-y-4">
                     <h2 className="text-4xl font-bold text-gray-800 animate-fadeIn">
-                        You're Doing Great!
+                        You&apos;re Doing Great!
                     </h2>
                     <p className="text-xl text-gray-600 max-w-md mx-auto animate-fadeIn delay-200">
                         Keep up the positive energy. Remember, every day is a new opportunity to grow and succeed!
