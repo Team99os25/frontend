@@ -87,28 +87,28 @@ const HRDashboard = () => {
       axios.get(`${process.env.NEXT_PUBLIC_API_URL}/hr/escalated-chats`, {withCredentials:true})
         .then((res) => {
           var highRiskEmploye: Employee[] = [];
-          res.data.forEach(dat => {
-                highRiskEmploye.push({
-                  employeeId: dat.emp_id,
-                  employeeName: dat.emp_name,
-                  vulnerabilityScore: dat.vulnerability_score,
-                  date: new Date(dat.last_session_date).toLocaleDateString('en-GB')
-                })
-          })
+            res.data.forEach((dat: { emp_id: string; emp_name: string; vulnerability_score: number; last_session_date: string }) => {
+              highRiskEmploye.push({
+                employeeId: dat.emp_id,
+                employeeName: dat.emp_name,
+                vulnerabilityScore: dat.vulnerability_score,
+                date: new Date(dat.last_session_date).toLocaleDateString('en-GB')
+              })
+            })
           setHighRiskEmployees(highRiskEmploye)
         })
 
         axios.get(`${process.env.NEXT_PUBLIC_API_URL}/hr/intervention-sessions`, {withCredentials:true})
         .then((res) => {
           var notEsclated: Employee[] = [];
-          res.data.forEach(dat => {
+            res.data.forEach((dat: { emp_id: string; emp_name: string; vulnerability_score: number; started_at: string }) => {
             notEsclated.push({
-                  employeeId: dat.emp_id,
-                  employeeName: dat.emp_name,
-                  vulnerabilityScore: dat.vulnerability_score,
-                  date: new Date(dat.started_at).toLocaleDateString('en-GB')
-                })
-          })
+                employeeId: dat.emp_id,
+                employeeName: dat.emp_name,
+                vulnerabilityScore: dat.vulnerability_score,
+                date: new Date(dat.started_at).toLocaleDateString('en-GB')
+              })
+            })
           setNotEscalated(notEsclated)
         })
         .catch((err) => {
