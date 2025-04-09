@@ -70,7 +70,7 @@ const MyChart = () => {
       try {
         const formattedDate = format(date, 'yyyy-MM-dd');
         const response = await axios.get(
-          `http://localhost:8000/hr/sentiment-distribution?date_str=${formattedDate}`,
+          `${process.env.NEXT_PUBLIC_API_URL}/hr/sentiment-distribution?date_str=${formattedDate}`,
           { withCredentials: true }
         );
         

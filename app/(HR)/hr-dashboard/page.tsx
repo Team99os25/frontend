@@ -96,15 +96,15 @@ const HRDashboard = () => {
       label: "Leaves in the last months",
       className: "chart-5",
     },
-    {
-      component: <PerformanceSimpleLine />,
-      label: "Perfomance Review",
-      // className: "chart-6",
-    },
+    // {
+    //   component: <PerformanceSimpleLine />,
+    //   label: "Perfomance Review",
+    //   // className: "chart-6",
+    // },
   ];
 
   useEffect(() => {
-      axios.get("http://localhost:8000/hr/escalated-chats", {withCredentials:true})
+      axios.get(`${process.env.NEXT_PUBLIC_API_URL}/hr/escalated-chats`, {withCredentials:true})
         .then((res) => {
           var highRiskEmploye: Employee[] = [];
           res.data.forEach(dat => {
@@ -118,7 +118,7 @@ const HRDashboard = () => {
           setHighRiskEmployees(highRiskEmploye)
         })
 
-        axios.get("http://localhost:8000/hr/intervention-sessions", {withCredentials:true})
+        axios.get(`${process.env.NEXT_PUBLIC_API_URL}/hr/intervention-sessions`, {withCredentials:true})
         .then((res) => {
           var notEsclated: Employee[] = [];
           res.data.forEach(dat => {

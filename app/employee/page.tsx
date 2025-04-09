@@ -1,6 +1,6 @@
 "use client";
 
-import SmartToyIcon from "@mui/icons-material/SmartToy";
+// import SmartToyIcon from "@mui/icons-material/SmartToy";
 import Chatbot from "../chatbot/page";
 import { useRouter } from "next/navigation";
 
@@ -39,7 +39,7 @@ const EmployeeDashboard = () => {
           className="flex flex-row items-center justify-center py-3 bg-green-500 px-4 m-4 rounded-lg"
           onClick={() => router.push('/chatbot')}
         >
-          <SmartToyIcon/>
+          {/* <SmartToyIcon/> */}
           Let&apos;s talk
         </button>
       </div>

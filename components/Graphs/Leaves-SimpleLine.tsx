@@ -1,31 +1,28 @@
 "use client";
 
-import { LineChart, Line, Tooltip, ResponsiveContainer, XAxis, YAxis, Label, CartesianGrid } from 'recharts';
+import axios from 'axios';
+import { useEffect, useState } from 'react';
+import { PieChart, Pie, Tooltip, Cell, Legend, ResponsiveContainer } from 'recharts';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-const MonthMap = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-const currentMonth = new Date().getMonth(); // 0 = Jan, 11 = Dec
+interface LeaveData {
+  name: string;
+  value: number;
+}
 
-const data = [
-  { name: MonthMap[(currentMonth + 1) % 12], value: 5 },
-  { name: MonthMap[(currentMonth + 2) % 12], value: 17 },
-  { name: MonthMap[(currentMonth + 3) % 12], value: 21 },
-  { name: MonthMap[(currentMonth + 4) % 12], value: 9 },
-  { name: MonthMap[(currentMonth + 5) % 12], value: 14 },
-/*   { name: MonthMap[(currentMonth + 6) % 12], value: 15 },
-  { name: MonthMap[(currentMonth + 7) % 12], value: 20 },
-  { name: MonthMap[(currentMonth + 8) % 12], value: 18 },
-  { name: MonthMap[(currentMonth + 9) % 12], value: 7 },
-  { name: MonthMap[(currentMonth + 10) % 12], value: 11 },
-  { name: MonthMap[(currentMonth + 11) % 12], value: 15 }, */
-  { name: MonthMap[currentMonth], value: 15 },
-];
+const COLORS = {
+  'Annual Leave': '#10b981',    // emerald
+  'Casual Leave': '#3b82f6',    // blue
+  'Sick Leave': '#f59e0b',      // amber
+  'Unpaid Leave': '#ef4444'     // red
+};
 
-const CustomTooltip = ({ active, payload, label }: any) => {
+const CustomTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-white/90 backdrop-blur-sm border border-gray-200 rounded-lg shadow-lg p-3">
-        <p className="text-sm font-medium text-gray-600">{label}</p>
-        <p className="text-sm font-semibold text-emerald-600">
+      <div className="bg-slate-800/90 backdrop-blur-sm border border-slate-700 rounded-lg shadow-lg p-3">
+        <p className="text-sm font-medium text-slate-200">{payload[0].name}</p>
+        <p className="text-sm font-semibold text-slate-200">
           {`${payload[0].value} leaves`}
         </p>
       </div>
@@ -34,55 +31,121 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-const SimpleLineChart = () => {
+const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index }: any) => {
+  const RADIAN = Math.PI / 180;
+  const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+  const x = cx + radius * Math.cos(-midAngle * RADIAN);
+  const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
   return (
-    <div className="w-full h-[250px] p-2 rounded-lg overflow-hidden">
-      <ResponsiveContainer width="100%" height="100%">
-        <LineChart 
-          data={data}
-          margin={{ top: 10, right: 30, left: 0, bottom: 20 }}
-        >
-          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-          <XAxis 
-            dataKey="name"
-            stroke="#6b7280"
-            tick={{ fill: '#6b7280', fontSize: 12 }}
-          >
-            <Label 
-              value="Month" 
-              offset={-5} 
-              position="insideBottom"
-              fill="#4b5563"
-              fontSize={12}
-            />
-          </XAxis>
-          <YAxis
-            stroke="#6b7280"
-            tick={{ fill: '#6b7280', fontSize: 12 }}
-          >
-            <Label 
-              value="Number of Leaves" 
-              angle={-90} 
-              position="insideLeft"
-              fill="#4b5563"
-              fontSize={12}
-              dy={60}
-            />
-          </YAxis>
-          <Tooltip content={<CustomTooltip />} />
-          <Line 
-            type="monotone" 
-            dataKey="value" 
-            stroke="#10b981" 
-            strokeWidth={2}
-            dot={{ stroke: '#10b981', strokeWidth: 2, r: 4, fill: '#fff' }}
-            activeDot={{ stroke: '#10b981', strokeWidth: 2, r: 6, fill: '#fff' }}
-            animationDuration={1500}
-          />
-        </LineChart>
-      </ResponsiveContainer>
+    <text
+      x={x}
+      y={y}
+      fill="white"
+      textAnchor={x > cx ? 'start' : 'end'}
+      dominantBaseline="central"
+      className="text-xs font-medium"
+    >
+      {`${(percent * 100).toFixed(0)}%`}
+    </text>
+  );
+};
+
+const LeavesPieChart = () => {
+  const [selectedYear, setSelectedYear] = useState<string>(new Date().getFullYear().toString());
+  const [chartData, setChartData] = useState<LeaveData[]>([]);
+
+  const years = Array.from({ length: 5 }, (_, i) => {
+    const year = new Date().getFullYear() - i;
+    return { value: year.toString(), label: year.toString() };
+  });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL}/hr/leaves-distribution?year=${selectedYear}`,
+          { withCredentials: true }
+        );
+        
+        const leaves = response.data.distribution;
+        const formattedData = Object.entries(leaves).map(([type, count]) => ({
+          name: type,
+          value: count as number
+        }));
+        
+        setChartData(formattedData);
+      } catch (error) {
+        console.error('Error fetching leaves data:', error);
+      }
+    };
+
+    fetchData();
+  }, [selectedYear]);
+
+  return (
+    <div className="w-full h-full p-4 rounded-lg bg-slate-800/80">
+      <div className="flex flex-col items-center justify-between mb-4">
+        <h3 className="text-lg font-medium text-slate-200 mb-2">Leave Distribution</h3>
+        <Select value={selectedYear} onValueChange={setSelectedYear}>
+          <SelectTrigger className="w-[100px] bg-slate-700 border-slate-600 text-slate-200">
+            <SelectValue placeholder="Select year" />
+          </SelectTrigger>
+          <SelectContent className="bg-slate-800 border-slate-700">
+            {years.map((year) => (
+              <SelectItem 
+                key={year.value} 
+                value={year.value}
+                className="text-slate-200 hover:bg-slate-700 focus:bg-slate-700 focus:text-slate-200"
+              >
+                {year.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="w-full h-[250px]">
+        {chartData.length > 0 ? (
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie
+                data={chartData}
+                dataKey="value"
+                nameKey="name"
+                cx="50%"
+                cy="50%"
+                outerRadius={80}
+                innerRadius={40}
+                paddingAngle={3}
+                labelLine={false}
+                label={renderCustomizedLabel}
+              >
+                {chartData.map((entry, index) => (
+                  <Cell 
+                    key={`cell-${index}`} 
+                    fill={COLORS[entry.name as keyof typeof COLORS]}
+                    className="hover:opacity-80 transition-opacity duration-300"
+                  />
+                ))}
+              </Pie>
+              <Tooltip content={<CustomTooltip />} />
+              <Legend 
+                verticalAlign="bottom" 
+                height={36}
+                formatter={(value: string) => (
+                  <span className="text-sm text-slate-200">{value}</span>
+                )}
+              />
+            </PieChart>
+          </ResponsiveContainer>
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-slate-400">
+            No data available for selected year
+          </div>
+        )}
+      </div>
     </div>
   );
 };
 
-export default SimpleLineChart;
+export default LeavesPieChart;

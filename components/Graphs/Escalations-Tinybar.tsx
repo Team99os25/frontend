@@ -38,7 +38,7 @@ const TinyBarChart = () => {
     const fetchData = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:8000/hr/sessions/yearly-escalations?year=${selectedYear}`,
+          `${process.env.NEXT_PUBLIC_API_URL}/hr/sessions/yearly-escalations?year=${selectedYear}`,
           { withCredentials: true }
         );
         
